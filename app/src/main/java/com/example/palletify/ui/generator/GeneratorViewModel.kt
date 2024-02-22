@@ -1,4 +1,5 @@
 package com.example.palletify.ui.generator
+
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -7,10 +8,13 @@ import com.example.palletify.data.MAX_NO_OF_WORDS
 import com.example.palletify.data.PaletteResponseBody
 import com.example.palletify.data.SCORE_INCREASE
 import com.example.palletify.data.allWords
+import com.example.palletify.data.fetchPalette
+import com.example.palletify.data.fetchRandomHex
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlin.concurrent.thread
 
 /**
  * ViewModel containing the app data and methods to process the data
@@ -32,7 +36,41 @@ class GeneratorViewModel : ViewModel() {
 
     init {
         resetGame()
+        thread {
+            resetPalette()
+        }
 
+    }
+
+    /*
+    * Re-initializes the palette when first loading the generator
+    */
+    fun resetPalette() {
+        usedColors.clear();
+
+        val palette = getRandomPalette();
+        _uiState.update { currentState ->
+            currentState.copy(
+                numberOfColours = palette.count,
+                colors = palette.colors,
+                mode = palette.mode,
+                image = palette.image
+            )
+        }
+
+    }
+
+    /*
+    * Generates a random palette based off a random color
+    */
+    fun getRandomPalette(): PaletteResponseBody {
+        val randomHexResponse = fetchRandomHex();
+        return if (usedColors.contains(randomHexResponse)) {
+            getRandomPalette();
+        } else {
+            usedColors.add(randomHexResponse);
+            fetchPalette(randomHexResponse);
+        }
     }
 
     /*
