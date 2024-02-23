@@ -4,11 +4,13 @@ import android.app.Activity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -20,7 +22,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.shapes
 import androidx.compose.material3.MaterialTheme.typography
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -30,6 +31,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
@@ -37,11 +39,11 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.palletify.R
 import com.example.palletify.ui.theme.PalletifyTheme
+import kotlin.concurrent.thread
 
 @Composable
 fun GeneratorScreen(gameViewModel: GeneratorViewModel = viewModel()) {
@@ -52,64 +54,101 @@ fun GeneratorScreen(gameViewModel: GeneratorViewModel = viewModel()) {
         modifier = Modifier
             .statusBarsPadding()
             .verticalScroll(rememberScrollState())
-            .safeDrawingPadding()
-            .padding(mediumPadding),
+            .safeDrawingPadding(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = stringResource(R.string.app_name),
-            style = typography.titleLarge,
-        )
-        GameLayout(
-            onUserGuessChanged = { gameViewModel.updateUserGuess(it) },
-            wordCount = gameUiState.currentWordCount,
-            userGuess = gameViewModel.userGuess,
-            onKeyboardDone = { gameViewModel.checkUserGuess() },
-            currentScrambledWord = gameUiState.currentScrambledWord,
-            isGuessWrong = gameUiState.isGuessedWordWrong,
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .padding(mediumPadding)
-        )
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(mediumPadding),
-            verticalArrangement = Arrangement.spacedBy(mediumPadding),
-            horizontalAlignment = Alignment.CenterHorizontally
+        Palette(colors = gameUiState.colors)
+        Button(
+            onClick = {
+                thread { gameViewModel.getRandomPalette() } }
         ) {
-
-            Button(
-                modifier = Modifier.fillMaxWidth(),
-                onClick = { gameViewModel.checkUserGuess() }
-            ) {
-                Text(
-                    text = stringResource(R.string.submit),
-                    fontSize = 16.sp
-                )
-            }
-
-            OutlinedButton(
-                onClick = { gameViewModel.skipWord() },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = stringResource(R.string.skip),
-                    fontSize = 16.sp
-                )
-            }
+            Text(text = "Generate")
         }
 
-        GameStatus(score = gameUiState.score, modifier = Modifier.padding(20.dp))
+//        Text(
+//            text = stringResource(R.string.app_name),
+//            style = typography.titleLarge,
+//        )
+//        GameLayout(
+//            onUserGuessChanged = { gameViewModel.updateUserGuess(it) },
+//            wordCount = gameUiState.currentWordCount,
+//            userGuess = gameViewModel.userGuess,
+//            onKeyboardDone = { gameViewModel.checkUserGuess() },
+//            currentScrambledWord = gameUiState.currentScrambledWord,
+//            isGuessWrong = gameUiState.isGuessedWordWrong,
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .wrapContentHeight()
+//                .padding(mediumPadding)
+//        )
+//        Column(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(mediumPadding),
+//            verticalArrangement = Arrangement.spacedBy(mediumPadding),
+//            horizontalAlignment = Alignment.CenterHorizontally
+//        ) {
+//
+//            Button(
+//                modifier = Modifier.fillMaxWidth(),
+//                onClick = { gameViewModel.checkUserGuess() }
+//            ) {
+//                Text(
+//                    text = stringResource(R.string.submit),
+//                    fontSize = 16.sp
+//                )
+//            }
+//
+//            OutlinedButton(
+//                onClick = { gameViewModel.skipWord() },
+//                modifier = Modifier.fillMaxWidth()
+//            ) {
+//                Text(
+//                    text = stringResource(R.string.skip),
+//                    fontSize = 16.sp
+//                )
+//            }
+//        }
+//
+//        GameStatus(score = gameUiState.score, modifier = Modifier.padding(20.dp))
+//
+//        if (gameUiState.isGameOver) {
+//            FinalScoreDialog(
+//                score = gameUiState.score,
+//                onPlayAgain = { gameViewModel.resetGame() }
+//            )
+//        }
+    }
+}
 
-        if (gameUiState.isGameOver) {
-            FinalScoreDialog(
-                score = gameUiState.score,
-                onPlayAgain = { gameViewModel.resetGame() }
-            )
+@Composable
+fun Palette(colors: List<com.example.palletify.data.Color>) {
+    Column ( Modifier.fillMaxSize()){
+        colors.forEach {color ->
+            ColorInPalette(color)
         }
+    }
+}
+
+@Composable
+fun ColorInPalette(color: com.example.palletify.data.Color) {
+    val backgroundColor = Color(color.rgb.fraction.r, color.rgb.fraction.g, color.rgb.fraction.b)
+    // formula from: https://stackoverflow.com/questions/3942878/how-to-decide-font-color-in-white-or-black-depending-on-background-color
+    val luminosity2 = color.rgb.r * 0.299 + color.rgb.g * 0.587 + color.rgb.b * 0.114 // this is not compliant with W3C, need to modify it in another iteration
+    Row(
+        Modifier
+            .fillMaxSize()
+            .background(backgroundColor)
+            .padding(16.dp)) {
+        Column(
+            Modifier
+                .fillMaxHeight()
+                .padding(top = 16.dp, bottom = 16.dp)) {
+            Text(modifier = Modifier.padding(bottom=4.dp), text = color.hex.clean, color = if (luminosity2 >= 186) Color.Black else Color.White, style = typography.bodyLarge)
+            Text(text = color.name.value, color = if (luminosity2 >= 186) Color.Black else Color.White, style = typography.labelMedium)
+        }
+
     }
 }
 

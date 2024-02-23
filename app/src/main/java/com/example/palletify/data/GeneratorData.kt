@@ -6,6 +6,7 @@ import kotlinx.serialization.json.Json
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import kotlin.random.Random
 
 
 const val MAX_NO_OF_WORDS = 10
@@ -213,11 +214,13 @@ data class RandomColourResponseBody(
     val hsl: String,
 )
 
+private val modeOptions = listOf("monochrome", "monochrome-dark", "monochrome-light", "analogic", "complement", "analogic-complement", "triad", "quad")
+
 private val jsonBuilder = Json { ignoreUnknownKeys = true }
 
 fun fetchPalette(
     seed: String,
-    mode: String = "monochrome",
+    mode: String = modeOptions[Random.nextInt(modeOptions.size)],
     numOfColours: Int = 5
 ): PaletteResponseBody {
     val client = OkHttpClient()
@@ -260,9 +263,9 @@ data class Hex(
 @Serializable
 data class Rgb(
     val fraction: RgBFraction,
-    val r: Int,
-    val g: Int,
-    val b: Int,
+    val r: Float,
+    val g: Float,
+    val b: Float,
     val value: String,
 )
 
