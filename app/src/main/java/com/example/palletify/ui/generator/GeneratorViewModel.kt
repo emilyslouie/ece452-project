@@ -5,7 +5,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.example.palletify.data.MAX_NO_OF_WORDS
-import com.example.palletify.data.PaletteResponseBody
 import com.example.palletify.data.SCORE_INCREASE
 import com.example.palletify.data.allWords
 import com.example.palletify.data.fetchPalette
@@ -47,29 +46,29 @@ class GeneratorViewModel : ViewModel() {
     */
     fun resetPalette() {
         usedColors.clear();
-
-        val palette = getRandomPalette();
-        _uiState.update { currentState ->
-            currentState.copy(
-                numberOfColours = palette.count,
-                colors = palette.colors,
-                mode = palette.mode,
-                image = palette.image
-            )
-        }
+        getRandomPalette();
 
     }
 
     /*
     * Generates a random palette based off a random color
     */
-    fun getRandomPalette(): PaletteResponseBody {
+    fun getRandomPalette() {
         val randomHexResponse = fetchRandomHex();
         return if (usedColors.contains(randomHexResponse)) {
             getRandomPalette();
         } else {
             usedColors.add(randomHexResponse);
-            fetchPalette(randomHexResponse);
+            val palette = fetchPalette(randomHexResponse);
+            _uiState.update { currentState ->
+                currentState.copy(
+                    numberOfColours = palette.count,
+                    colors = palette.colors,
+                    mode = palette.mode,
+                    image = palette.image
+                )
+            }
+
         }
     }
 
