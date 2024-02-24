@@ -58,69 +58,7 @@ fun GeneratorScreen(gameViewModel: GeneratorViewModel = viewModel()) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Palette(colors = gameUiState.colors)
-        Button(
-            onClick = {
-                thread { gameViewModel.getRandomPalette() } }
-        ) {
-            Text(text = "Generate")
-        }
 
-//        Text(
-//            text = stringResource(R.string.app_name),
-//            style = typography.titleLarge,
-//        )
-//        GameLayout(
-//            onUserGuessChanged = { gameViewModel.updateUserGuess(it) },
-//            wordCount = gameUiState.currentWordCount,
-//            userGuess = gameViewModel.userGuess,
-//            onKeyboardDone = { gameViewModel.checkUserGuess() },
-//            currentScrambledWord = gameUiState.currentScrambledWord,
-//            isGuessWrong = gameUiState.isGuessedWordWrong,
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .wrapContentHeight()
-//                .padding(mediumPadding)
-//        )
-//        Column(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .padding(mediumPadding),
-//            verticalArrangement = Arrangement.spacedBy(mediumPadding),
-//            horizontalAlignment = Alignment.CenterHorizontally
-//        ) {
-//
-//            Button(
-//                modifier = Modifier.fillMaxWidth(),
-//                onClick = { gameViewModel.checkUserGuess() }
-//            ) {
-//                Text(
-//                    text = stringResource(R.string.submit),
-//                    fontSize = 16.sp
-//                )
-//            }
-//
-//            OutlinedButton(
-//                onClick = { gameViewModel.skipWord() },
-//                modifier = Modifier.fillMaxWidth()
-//            ) {
-//                Text(
-//                    text = stringResource(R.string.skip),
-//                    fontSize = 16.sp
-//                )
-//            }
-//        }
-//
-//        GameStatus(score = gameUiState.score, modifier = Modifier.padding(20.dp))
-//
-//        if (gameUiState.isGameOver) {
-//            FinalScoreDialog(
-//                score = gameUiState.score,
-//                onPlayAgain = { gameViewModel.resetGame() }
-//            )
-//        }
-    }
-}
 
 @Composable
 fun Palette(colors: List<com.example.palletify.data.Color>) {
