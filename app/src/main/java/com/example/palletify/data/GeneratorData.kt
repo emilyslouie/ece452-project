@@ -13,7 +13,7 @@ import kotlin.random.Random
  */
 fun fetchRandomHex(): String {
     val client = OkHttpClient()
-    val request: Request = okhttp3.Request(
+    val request = Request(
         url = "https://x-colors.yurace.pro/api/random".toHttpUrl()
     )
     val response = client.newCall(request).execute()
@@ -29,7 +29,16 @@ data class RandomColourResponseBody(
     val hsl: String,
 )
 
-private val modeOptions = listOf("monochrome", "monochrome-dark", "monochrome-light", "analogic", "complement", "analogic-complement", "triad", "quad")
+private val modeOptions = listOf(
+    "monochrome",
+    "monochrome-dark",
+    "monochrome-light",
+    "analogic",
+    "complement",
+    "analogic-complement",
+    "triad",
+    "quad"
+)
 
 private val jsonBuilder = Json { ignoreUnknownKeys = true }
 
@@ -39,7 +48,7 @@ fun fetchPalette(
     numOfColours: Int = 5
 ): PaletteResponseBody {
     val client = OkHttpClient()
-    val request: Request = okhttp3.Request(
+    val request = Request(
         url = "https://www.thecolorapi.com/scheme?hex=$seed&mode=$mode&count=$numOfColours".toHttpUrl()
     )
     val response = client.newCall(request).execute()
