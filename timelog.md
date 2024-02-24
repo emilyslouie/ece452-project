@@ -4,4 +4,5 @@
 |02/21/2024  |        |          |2        |              |         |        |Added template functions for generator         |
 |02/21/2024  |        |          |3        |              |         |        |Get random colour and palette from API         |
 |02/22/2024  |        |          |3.5      |              |         |        |Display and generate colour palette on click   |
+|02/23/2024  |        |          |3        |              |         |        |Fix generator UI and text contrast             |
 
