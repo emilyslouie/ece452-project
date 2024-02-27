@@ -11,10 +11,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Redo
+import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -54,18 +57,32 @@ fun GeneratorScreen(generatorViewModel: GeneratorViewModel = viewModel()) {
                         .fillMaxWidth()
                         .padding(top = 16.dp, bottom = 16.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly,
+                    // TODO: ensure that when the "more options button" is placed, that the generate button is in the middle
                 ) {
+                    Row() {
+                        IconButton(
+                            onClick = { generatorViewModel.handleUndo() },
+                            enabled = generatorUiState.palettesInUndoStack > 0
+                        ) {
+                            Icon(Icons.AutoMirrored.Filled.Undo, contentDescription = "Undo");
+                        }
+                        IconButton(
+                            onClick = { generatorViewModel.handleRedo() },
+                            enabled = generatorUiState.palettesInRedoStack > 0
+                        ) {
+                            Icon(Icons.AutoMirrored.Filled.Redo, contentDescription = "Redo");
+                        }
+                    }
                     Button(onClick = {
-                        thread { generatorViewModel.getRandomPalette() }
+                        thread { generatorViewModel.getNewRandomPalette() }
                     }) {
                         Text(
                             modifier = Modifier.padding(end = 4.dp),
                             text = stringResource(R.string.generate),
                             style = typography.titleLarge
                         )
-                        Icon(Icons.Filled.Refresh, contentDescription = "Localized description")
+                        Icon(Icons.Filled.Refresh, contentDescription = "Regenerate")
                     }
-
                 }
             }
         }
@@ -84,19 +101,19 @@ fun GeneratorScreen(generatorViewModel: GeneratorViewModel = viewModel()) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Palette(
-                colors = generatorUiState.colors,
+                colors = generatorUiState.currentPalette,
                 numOfColors = generatorUiState.numberOfColours,
                 heightAvailable = columnHeightDp
             )
         }
     }
-
 }
 
 
 @Composable
 fun Palette(colors: List<com.example.palletify.data.Color>, numOfColors: Int, heightAvailable: Dp) {
     val heightPerColor = heightAvailable / numOfColors;
+    // TODO: probably need to change this to be based on the number of colours so that we can add/subtract num of colours in a palette
     colors.forEach { color ->
         ColorInPalette(color, heightPerColor)
     }
@@ -146,7 +163,6 @@ fun ColorInPalette(color: com.example.palletify.data.Color, heightPerColor: Dp) 
                 style = typography.labelMedium
             )
         }
-
     }
 }
 
