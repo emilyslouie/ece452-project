@@ -5,4 +5,4 @@
 |02/21/2024  |        |          |3        |              |         |        |Get random colour and palette from API         |
 |02/22/2024  |        |          |3.5      |              |         |        |Display and generate colour palette on click   |
 |02/23/2024  |        |          |3        |              |         |        |Fix generator UI and text contrast             |
-
+|02/26/2024  |        |          |6        |              |         |        |Implement undo/redo for generating palettes    |
