@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Redo
 import androidx.compose.material.icons.automirrored.filled.Undo
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
@@ -74,6 +76,7 @@ fun GeneratorScreen(generatorViewModel: GeneratorViewModel = viewModel()) {
                         }
                     }
                     Button(onClick = {
+                        // TODO: Add logic to generate palette with locked colour(s)
                         thread { generatorViewModel.getNewRandomPalette() }
                     }) {
                         Text(
@@ -101,6 +104,7 @@ fun GeneratorScreen(generatorViewModel: GeneratorViewModel = viewModel()) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Palette(
+                generatorViewModel = generatorViewModel,
                 colors = generatorUiState.currentPalette,
                 numOfColors = generatorUiState.numberOfColours,
                 heightAvailable = columnHeightDp
@@ -111,11 +115,11 @@ fun GeneratorScreen(generatorViewModel: GeneratorViewModel = viewModel()) {
 
 
 @Composable
-fun Palette(colors: List<com.example.palletify.data.Color>, numOfColors: Int, heightAvailable: Dp) {
+fun Palette(generatorViewModel: GeneratorViewModel, colors: List<com.example.palletify.data.Color>, numOfColors: Int, heightAvailable: Dp) {
     val heightPerColor = heightAvailable / numOfColors;
     // TODO: probably need to change this to be based on the number of colours so that we can add/subtract num of colours in a palette
     colors.forEach { color ->
-        ColorInPalette(color, heightPerColor)
+        ColorInPalette(generatorViewModel, color, heightPerColor)
     }
 }
 
@@ -135,7 +139,8 @@ fun calculateRgbFraction(color: Float): Double {
 }
 
 @Composable
-fun ColorInPalette(color: com.example.palletify.data.Color, heightPerColor: Dp) {
+fun ColorInPalette(generatorViewModel: GeneratorViewModel, color: com.example.palletify.data.Color, heightPerColor: Dp) {
+    val generatorUiState by generatorViewModel.uiState.collectAsStateWithLifecycle()
     val backgroundColor = Color(color.rgb.fraction.r, color.rgb.fraction.g, color.rgb.fraction.b)
     val luminosity =
         calculateLuminosity(color.rgb.fraction.r, color.rgb.fraction.g, color.rgb.fraction.b)
@@ -145,7 +150,9 @@ fun ColorInPalette(color: com.example.palletify.data.Color, heightPerColor: Dp) 
             .height(heightPerColor)
             .background(backgroundColor)
             .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+
     ) {
         Column(
             Modifier
@@ -162,6 +169,22 @@ fun ColorInPalette(color: com.example.palletify.data.Color, heightPerColor: Dp) 
                 color = if (luminosity >= 0.179) Color(35, 35, 35) else Color(230, 230, 230),
                 style = typography.labelMedium
             )
+        }
+
+        if (!generatorUiState.lockedColors.contains(color)) {
+            // Button to lock a colour
+            IconButton(
+                onClick = { generatorViewModel.handleLockForColor(color) }
+            ) {
+                Icon(Icons.Filled.LockOpen, contentDescription = "Lock a colour");
+            }
+        } else {
+            // Button to unlock a colour
+            IconButton(
+                onClick = { generatorViewModel.handleUnlockForColor(color) }
+            ) {
+                Icon(Icons.Filled.Lock, contentDescription = "Unlock a colour");
+            }
         }
     }
 }

@@ -25,13 +25,16 @@ class GeneratorViewModel : ViewModel() {
         val colors: List<Color>,
         val mode: String,
         val image: Image,
+        // Locked colours are a member of PaletteObj so they will persist across undo/redo actions
+        // We can change this later if it's undesirable behaviour
+        var lockedColours: MutableSet<Color>,
     )
 
     // Set of colors that have already been used as a seed in the generator
     private var usedSeedColors: MutableSet<String> = mutableSetOf()
 
     // Current palette
-    private var currentPalette: PaletteObj = PaletteObj(0, emptyList(), "", Image("", ""));
+    private var currentPalette: PaletteObj = PaletteObj(0, emptyList(), "", Image("", ""), mutableSetOf());
 
     // Stacks to keep palettes that can be undone and redone
     private var undoPalettes: ArrayDeque<PaletteObj> = ArrayDeque();
@@ -60,7 +63,7 @@ class GeneratorViewModel : ViewModel() {
         val randomHexResponse = getRandomHex();
         usedSeedColors.add(randomHexResponse);
         val response = fetchPalette(randomHexResponse);
-        val newPalette = PaletteObj(response.count, response.colors, response.mode, response.image);
+        val newPalette = PaletteObj(response.count, response.colors, response.mode, response.image, mutableSetOf());
         return newPalette;
     }
 
@@ -128,7 +131,6 @@ class GeneratorViewModel : ViewModel() {
         }
     }
 
-
     /*
     * Handle redo to go to a palette previous palette
     */
@@ -140,6 +142,42 @@ class GeneratorViewModel : ViewModel() {
             currentState.copy(
                 palettesInUndoStack = currentState.palettesInUndoStack + 1,
                 palettesInRedoStack = currentState.palettesInRedoStack - 1
+            );
+        }
+    }
+
+    /*
+    * Add a colour to its palette's set of lockedColours
+    */
+    fun handleLockForColor(color: Color) {
+        // Update view model
+        currentPalette.lockedColours.add(color)
+        // Clone set to assign to ui state
+        val newLockedColors = currentPalette.lockedColours.toMutableSet()
+
+        _uiState.update { currentState ->
+            currentState.copy(
+                // If we set lockedColors = currentPalette.lockedColours, then even though the contents
+                // of the set change, the ui state sees same reference address, so won't recompose
+                lockedColors = newLockedColors
+            );
+        }
+    }
+
+    /*
+    * Remove a colour from its palette's set of lockedColours
+    */
+    fun handleUnlockForColor(color: Color) {
+        // Update view model
+        currentPalette.lockedColours.remove(color)
+        // Clone set to assign to ui state
+        val newLockedColors = currentPalette.lockedColours.toMutableSet()
+
+        _uiState.update { currentState ->
+            currentState.copy(
+                // If we set lockedColors = currentPalette.lockedColours, then even though the contents
+                // of the set change, the ui state sees same reference address, so won't recompose
+                lockedColors = newLockedColors
             );
         }
     }
