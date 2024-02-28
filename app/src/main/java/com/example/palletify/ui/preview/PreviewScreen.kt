@@ -5,9 +5,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 
 import androidx.compose.ui.Modifier
+import androidx.compose.material3.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.material3.MaterialTheme
 
 
 import androidx.compose.foundation.layout.Row
@@ -36,10 +38,31 @@ import com.example.palletify.ui.theme.PalletifyTheme
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.example.palletify.R
+
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.unit.dp
+
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+
+import androidx.compose.runtime.remember
+
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.dp
+import kotlin.random.Random
 
 @Composable
 fun OutlinedRadioButtonWithText(
@@ -50,7 +73,7 @@ fun OutlinedRadioButtonWithText(
     OutlinedButton(
         onClick = onClick,
         modifier = Modifier
-            .padding(28.dp)
+            .padding(start = 28.dp, end = 28.dp, top = 28.dp)
             .fillMaxWidth()
     ) {
         Row (verticalAlignment = Alignment.CenterVertically) {
@@ -69,6 +92,59 @@ fun OutlinedRadioButtonWithText(
 }
 
 @Composable
+fun GraphCard() {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        shape = MaterialTheme.shapes.medium
+    ) {
+        BoxWithConstraints(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            val width = constraints.maxWidth.toFloat()
+            val height = with(LocalDensity.current) { 200.dp.toPx() }
+            val colorScheme = MaterialTheme.colorScheme
+
+            val points = remember {
+                List(10) {
+                    Offset(
+                        x = Random.nextFloat() * width,
+                        y = Random.nextFloat() * height
+                    )
+                }.sortedBy { it.x }
+            }
+            val path = remember {
+                Path().apply {
+
+                    moveTo(points.first().x, points.first().y)
+
+                    for (i in 1 until points.size) {
+                        val previousPoint = points[i - 1]
+                        val currentPoint = points[i]
+                        quadraticBezierTo(
+                            x1 = (previousPoint.x + currentPoint.x) / 2,
+                            y1 = previousPoint.y,
+                            x2 = currentPoint.x,
+                            y2 = currentPoint.y
+                        )
+                    }
+                }
+            }
+
+            Canvas(modifier = Modifier.fillMaxWidth().height(200.dp)) {
+                drawPath(
+                    path = path,
+                    color = colorScheme.onSurface,
+                    style = Stroke(width = 3.dp.toPx())
+                )
+            }
+        }
+    }
+}
+
+@Composable
 fun ProfileCard(
     profileImagePainter: Painter,
     primaryText: String,
@@ -77,30 +153,47 @@ fun ProfileCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 28.dp, end = 28.dp),
+            .padding(start = 28.dp, end = 28.dp, top = 28.dp, bottom = 28.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Image(
-                painter = profileImagePainter,
-                contentDescription = "Profile picture",
+            Box(
                 modifier = Modifier
-                    .size(48.dp)
-//                    .clip(CircleShape)
-                    .border(2.dp, Color.Gray, CircleShape),
-                contentScale = ContentScale.Crop
-            )
-            Spacer(modifier = Modifier.width(16.dp)) 
+                    .size(48.dp),
+//                    .border(2.dp, Color.Gray, CircleShape), // Circular border
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = profileImagePainter,
+                    contentDescription = "Profile picture",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .border(2.dp, Color.Gray, CircleShape),
+                )
+            }
+            Spacer(modifier = Modifier.width(16.dp))
             Column {
-                Text(primaryText, style = MaterialTheme.typography.headlineSmall)
+                Text(
+                    primaryText,
+                    style = TextStyle(
+                        fontSize = 25.sp,
+//                        textAlign = TextAlign.Center,
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                )
                 Text(secondaryText, style = MaterialTheme.typography.bodyMedium)
             }
         }
     }
 }
+
 
 @Composable
 fun RadioButtonGroup() {
@@ -123,6 +216,7 @@ fun RadioButtonGroup() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PreviewScreen() {
+    val imagePainter = painterResource(id = R.drawable.profile)
     Scaffold(
         topBar = {
             TopAppBar(
@@ -164,6 +258,12 @@ fun PreviewScreen() {
                 Text("Button")
             }
             RadioButtonGroup()
+
+            ProfileCard(
+                profileImagePainter = imagePainter,
+                primaryText = "John Preview Doe",
+                secondaryText = "Software Engineer at Palletify Corp"
+            )
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -178,6 +278,7 @@ fun PreviewScreen() {
 
                 }
             }
+            GraphCard()
         }
     }
 }
