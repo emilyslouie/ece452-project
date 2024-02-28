@@ -56,6 +56,8 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 
 import androidx.compose.runtime.remember
 
@@ -217,6 +219,7 @@ fun RadioButtonGroup() {
 @Composable
 fun PreviewScreen() {
     val imagePainter = painterResource(id = R.drawable.profile)
+    val scrollState = rememberScrollState()
     Scaffold(
         topBar = {
             TopAppBar(
@@ -230,7 +233,8 @@ fun PreviewScreen() {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding),
+                .padding(innerPadding)
+                .verticalScroll(scrollState),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Box(
@@ -264,20 +268,20 @@ fun PreviewScreen() {
                 primaryText = "John Preview Doe",
                 secondaryText = "Software Engineer at Palletify Corp"
             )
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 28.dp, end = 28.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Text("Some Primary Text", style = MaterialTheme.typography.headlineSmall)
-                    Text("Some secondary text", style = MaterialTheme.typography.bodyMedium)
-
-                }
-            }
+//            Card(
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .padding(start = 28.dp, end = 28.dp),
+//                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+//            ) {
+//                Column(
+//                    modifier = Modifier.padding(16.dp)
+//                ) {
+//                    Text("Some Primary Text", style = MaterialTheme.typography.headlineSmall)
+//                    Text("Some secondary text", style = MaterialTheme.typography.bodyMedium)
+//
+//                }
+//            }
             GraphCard()
         }
     }
