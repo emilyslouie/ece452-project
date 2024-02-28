@@ -171,10 +171,13 @@ class GeneratorViewModel : ViewModel() {
         redoPalettes.add(currentPalette);
         val oldPalette = undoPalettes.removeLast();
         setCurrentPalette(oldPalette);
+        // Clone set to assign to ui state
+        val oldLockedColors = currentPalette.lockedColours.toMutableSet()
         _uiState.update { currentState ->
             currentState.copy(
                 palettesInUndoStack = currentState.palettesInUndoStack - 1,
-                palettesInRedoStack = currentState.palettesInRedoStack + 1
+                palettesInRedoStack = currentState.palettesInRedoStack + 1,
+                lockedColors = oldLockedColors
             );
         }
     }
@@ -186,10 +189,13 @@ class GeneratorViewModel : ViewModel() {
         undoPalettes.add(currentPalette);
         val newPalette = redoPalettes.removeLast();
         setCurrentPalette(newPalette);
+        // Clone set to assign to ui state
+        val newLockedColors = currentPalette.lockedColours.toMutableSet()
         _uiState.update { currentState ->
             currentState.copy(
                 palettesInUndoStack = currentState.palettesInUndoStack + 1,
-                palettesInRedoStack = currentState.palettesInRedoStack - 1
+                palettesInRedoStack = currentState.palettesInRedoStack - 1,
+                lockedColors = newLockedColors
             );
         }
     }
