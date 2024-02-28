@@ -68,6 +68,33 @@ class GeneratorViewModel : ViewModel() {
     }
 
     /*
+    * Generates a  palette based off a given seed
+    */
+    private fun getPaletteForSeed(seedColor: Color): PaletteObj {
+        val seedHex = seedColor.hex.clean
+        val response = fetchPalette(seedHex);
+        val newPalette = PaletteObj(response.count, response.colors, response.mode, response.image, mutableSetOf());
+
+        // TODO: thecolorapi does not use the seed color in the new palette, so locking is unintuitive
+        // it uses the locked colour as a seed, but it may not be present in the generated palette
+        if (newPalette.colors.contains(seedColor)) {
+            // Re-lock seed color (if it exists in palette) for consistency after generation
+            currentPalette.lockedColours.add(seedColor)
+            // Clone set to assign to ui state
+            val newLockedColors = currentPalette.lockedColours.toMutableSet()
+
+            _uiState.update { currentState ->
+                currentState.copy(
+                    // If we set lockedColors = currentPalette.lockedColours, then even though the contents
+                    // of the set change, the ui state sees same reference address, so won't recompose
+                    lockedColors = newLockedColors
+                );
+            }
+        }
+        return newPalette;
+    }
+
+    /*
     * Generates a random hex code
     */
     private fun getRandomHex(): String {
@@ -99,6 +126,27 @@ class GeneratorViewModel : ViewModel() {
     */
     fun getNewRandomPalette() {
         val palette = getRandomPalette();
+        var currentCountInUndoStack = _uiState.value.palettesInUndoStack;
+        if (currentPalette.numberOfColours > 0) {
+            undoPalettes.add(currentPalette);
+            currentCountInUndoStack++;
+        }
+        setCurrentPalette(palette);
+        // The redo stack is cleared if a new palette is generated
+        redoPalettes.clear();
+        _uiState.update { currentState ->
+            currentState.copy(
+                palettesInUndoStack = currentCountInUndoStack,
+                palettesInRedoStack = 0
+            );
+        }
+    }
+
+    /*
+    * Gets a new palette using seed colour, updates the current palette, and update undo/redo stacks
+    */
+    fun getNewPaletteWithSeed(seedColor: Color) {
+        val palette = getPaletteForSeed(seedColor);
         var currentCountInUndoStack = _uiState.value.palettesInUndoStack;
         if (currentPalette.numberOfColours > 0) {
             undoPalettes.add(currentPalette);
