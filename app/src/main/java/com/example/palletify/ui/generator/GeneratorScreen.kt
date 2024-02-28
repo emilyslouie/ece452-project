@@ -76,8 +76,17 @@ fun GeneratorScreen(generatorViewModel: GeneratorViewModel = viewModel()) {
                         }
                     }
                     Button(onClick = {
-                        // TODO: Add logic to generate palette with locked colour(s)
-                        thread { generatorViewModel.getNewRandomPalette() }
+
+                        if (generatorUiState.lockedColors.size == 1) {
+                            // TODO: Change undo/redo logic to update lockedColors for current palette
+                            val seedColor = generatorUiState.lockedColors.iterator().next();
+                            thread { generatorViewModel.getNewPaletteWithSeed(seedColor) }
+                        } else if (generatorUiState.lockedColors.size > 1) {
+                            // TODO: Send multiple requests for each seed, then combine results into one palette
+                        } else {
+                            // If no locked colours, generate palette with random seed
+                            thread { generatorViewModel.getNewRandomPalette() }
+                        }
                     }) {
                         Text(
                             modifier = Modifier.padding(end = 4.dp),
