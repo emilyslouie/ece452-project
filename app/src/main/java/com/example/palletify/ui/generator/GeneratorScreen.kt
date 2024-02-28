@@ -76,7 +76,6 @@ fun GeneratorScreen(generatorViewModel: GeneratorViewModel = viewModel()) {
                         }
                     }
                     Button(onClick = {
-
                         if (generatorUiState.lockedColors.size == 1) {
                             // TODO: Change undo/redo logic to update lockedColors for current palette
                             val seedColor = generatorUiState.lockedColors.iterator().next();
@@ -185,14 +184,22 @@ fun ColorInPalette(generatorViewModel: GeneratorViewModel, color: com.example.pa
             IconButton(
                 onClick = { generatorViewModel.handleLockForColor(color) }
             ) {
-                Icon(Icons.Filled.LockOpen, contentDescription = "Lock a colour");
+                Icon(
+                    Icons.Filled.LockOpen,
+                    contentDescription = "Lock a colour",
+                    tint = if (luminosity >= 0.179) Color.Black else Color.White
+                )
             }
         } else {
             // Button to unlock a colour
             IconButton(
                 onClick = { generatorViewModel.handleUnlockForColor(color) }
             ) {
-                Icon(Icons.Filled.Lock, contentDescription = "Unlock a colour");
+                Icon(
+                    Icons.Filled.Lock,
+                    contentDescription = "Unlock a colour",
+                    tint = if (luminosity >= 0.179) Color.Black else Color.White
+                )
             }
         }
     }
