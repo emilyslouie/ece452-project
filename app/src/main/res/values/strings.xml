@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">Palletify</string>
     <string name="generate">Generate</string>
+    <string name="take_photo">Take a photo to generate colours</string>
+    <string name="upload_photo">Upload a photo to generate colours</string>
+    <string name="retake_photo">Retake Photo</string>
+    <string name="use_photo">Use Photo</string>
+
 </resources>
