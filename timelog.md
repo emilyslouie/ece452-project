@@ -8,3 +8,4 @@
 | 02/26/2024 |      |          | 6   |              |         |        | Implement undo/redo for generating palettes           |
 | 02/28/2024 | 6    |          |     |              |         |        | Implement UI and API calls to lock/unlock colours     |
 | 02/28/2024 | 0.5  |          |     |              |         |        | Persist locked colours across undo/redo state changes |
+| 02/27/2024 |      |          |     |      6.5     |         |        | Add Preview screen and various UI elements in it      |
