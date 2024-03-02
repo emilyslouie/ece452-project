@@ -95,7 +95,7 @@ fun GeneratorScreen(generatorViewModel: GeneratorViewModel = viewModel()) {
 
 
 @Composable
-fun Palette(colors: List<com.example.palletify.data.Color>, numOfColors: Int, heightAvailable: Dp) {
+fun Palette(colors: List<com.example.palletify.data.Palette.Color>, numOfColors: Int, heightAvailable: Dp) {
     val heightPerColor = heightAvailable / numOfColors;
     colors.forEach { color ->
         ColorInPalette(color, heightPerColor)
@@ -118,7 +118,7 @@ fun calculateRgbFraction(color: Float): Double {
 }
 
 @Composable
-fun ColorInPalette(color: com.example.palletify.data.Color, heightPerColor: Dp) {
+fun ColorInPalette(color: com.example.palletify.data.Palette.Color, heightPerColor: Dp) {
     val backgroundColor = Color(color.rgb.fraction.r, color.rgb.fraction.g, color.rgb.fraction.b)
     val luminosity =
         calculateLuminosity(color.rgb.fraction.r, color.rgb.fraction.g, color.rgb.fraction.b)

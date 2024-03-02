@@ -8,6 +8,9 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import kotlin.random.Random
 
+import com.example.palletify.data.Palette.Color;
+import com.example.palletify.data.Palette.Image;
+
 /**
  * Data that is needed for the generator
  */
@@ -65,48 +68,3 @@ data class PaletteResponseBody(
     val seed: Color,
 )
 
-@Serializable
-data class Color(
-    val hex: Hex,
-    val rgb: Rgb,
-    val name: Name,
-    val contrast: Contrast,
-)
-
-@Serializable
-data class Hex(
-    val value: String,
-    val clean: String,
-)
-
-@Serializable
-data class Rgb(
-    val fraction: RgBFraction,
-    val r: Float,
-    val g: Float,
-    val b: Float,
-    val value: String,
-)
-
-@Serializable
-data class RgBFraction(
-    val r: Float,
-    val g: Float,
-    val b: Float,
-)
-
-@Serializable
-data class Name(
-    val value: String,
-)
-
-@Serializable
-data class Contrast(
-    val value: String
-)
-
-@Serializable
-data class Image(
-    val bare: String,
-    val named: String,
-)
