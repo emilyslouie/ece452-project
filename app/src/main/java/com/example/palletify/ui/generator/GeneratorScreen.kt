@@ -2,9 +2,11 @@ package com.example.palletify.ui.generator
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -13,6 +15,9 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Redo
 import androidx.compose.material.icons.automirrored.filled.Undo
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.LockOpen
+import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
@@ -30,14 +35,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.palletify.R
+import com.example.palletify.database.Palette
+import com.example.palletify.database.PaletteViewModel
 import com.example.palletify.ui.theme.PalletifyTheme
 import kotlin.concurrent.thread
 import kotlin.math.pow
@@ -49,73 +59,131 @@ fun GeneratorScreen(generatorViewModel: GeneratorViewModel = viewModel()) {
     var columnHeightDp by remember {
         mutableStateOf(0.dp)
     }
-    Scaffold(
-        bottomBar = {
-            BottomAppBar {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 16.dp, bottom = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly,
-                    // TODO: ensure that when the "more options button" is placed, that the generate button is in the middle
-                ) {
-                    Row() {
-                        IconButton(
-                            onClick = { generatorViewModel.handleUndo() },
-                            enabled = generatorUiState.palettesInUndoStack > 0
-                        ) {
-                            Icon(Icons.AutoMirrored.Filled.Undo, contentDescription = "Undo");
+    val context = LocalContext.current
+    val palletViewModel1 = ViewModelProvider(context as ViewModelStoreOwner).get(PaletteViewModel::class.java)
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = 56.dp) // Adjust the value based on your design
+    ) {
+        Scaffold(
+            bottomBar = {
+                BottomAppBar {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 16.dp, bottom = 16.dp),
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        // TODO: ensure that when the "more options button" is placed, that the generate button is in the middle
+                    ) {
+                        Row() {
+                            IconButton(
+                                onClick = { generatorViewModel.handleUndo() },
+                                enabled = generatorUiState.palettesInUndoStack > 0
+                            ) {
+                                Icon(Icons.AutoMirrored.Filled.Undo, contentDescription = "Undo");
+                            }
+                            IconButton(
+                                onClick = { generatorViewModel.handleRedo() },
+                                enabled = generatorUiState.palettesInRedoStack > 0
+                            ) {
+                                Icon(Icons.AutoMirrored.Filled.Redo, contentDescription = "Redo");
+                            }
                         }
-                        IconButton(
-                            onClick = { generatorViewModel.handleRedo() },
-                            enabled = generatorUiState.palettesInRedoStack > 0
-                        ) {
-                            Icon(Icons.AutoMirrored.Filled.Redo, contentDescription = "Redo");
+                        Button(onClick = {
+                            if (generatorUiState.lockedColors.size == 1) {
+                                // TODO: Change undo/redo logic to update lockedColors for current palette
+                                val seedColor = generatorUiState.lockedColors.iterator().next();
+                                thread { generatorViewModel.getNewPaletteWithSeed(seedColor) }
+                            } else if (generatorUiState.lockedColors.size > 1) {
+                                // TODO: Send multiple requests for each seed, then combine results into one palette
+                            } else {
+                                // If no locked colours, generate palette with random seed
+                                thread { generatorViewModel.getNewRandomPalette() }
+                            }
+                        }) {
+                            Text(
+                                modifier = Modifier.padding(end = 4.dp),
+                                text = stringResource(R.string.generate),
+                                style = typography.titleLarge
+                            )
+                            Icon(Icons.Filled.Refresh, contentDescription = "Regenerate")
                         }
-                    }
-                    Button(onClick = {
-                        thread { generatorViewModel.getNewRandomPalette() }
-                    }) {
-                        Text(
-                            modifier = Modifier.padding(end = 4.dp),
-                            text = stringResource(R.string.generate),
-                            style = typography.titleLarge
-                        )
-                        Icon(Icons.Filled.Refresh, contentDescription = "Regenerate")
+                        // Save Button
+                        Button(onClick = {
+                            val numberOfColors = generatorViewModel.uiState.value.numberOfColours
+                            val mode = generatorViewModel.uiState.value.mode
+                            val color1 =
+                                generatorViewModel.uiState.value.currentPalette.component1().hex.value
+                            val color2 =
+                                generatorViewModel.uiState.value.currentPalette.component2().hex.value
+                            val color3 =
+                                generatorViewModel.uiState.value.currentPalette.component3().hex.value
+                            val color4 =
+                                generatorViewModel.uiState.value.currentPalette.component4().hex.value
+                            val color5 =
+                                generatorViewModel.uiState.value.currentPalette.component5().hex.value
+                            val pallet = Palette(
+                                0,
+                                numberOfColors,
+                                color1 = color1,
+                                color2 = color2,
+                                color3 = color3,
+                                color4 = color4,
+                                color5 = color5,
+                                mode,
+                                favourite = false
+                            )
+                            palletViewModel1.addPalette(pallet)
+                        }
+                        ) {
+                            Text(
+                                modifier = Modifier.padding(end = 4.dp),
+                                text = "Save",
+                                style = typography.titleLarge
+                            )
+                            Icon(
+                                Icons.Filled.AddCircle,
+                                contentDescription = "Localized description"
+                            )
+
+                        }
                     }
                 }
             }
-        }
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .statusBarsPadding()
-                .safeDrawingPadding()
-                .padding(innerPadding)
-                .fillMaxHeight()
-                .onGloballyPositioned { coordinates ->
-                    // Get the available height of the container
-                    columnHeightDp = with(localDensity) { coordinates.size.height.toDp() }
-                },
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Palette(
-                colors = generatorUiState.currentPalette,
-                numOfColors = generatorUiState.numberOfColours,
-                heightAvailable = columnHeightDp
-            )
+        ) { innerPadding ->
+            Column(
+                modifier = Modifier
+                    .statusBarsPadding()
+                    .safeDrawingPadding()
+                    .padding(innerPadding)
+                    .fillMaxHeight()
+                    .onGloballyPositioned { coordinates ->
+                        // Get the available height of the container
+                        columnHeightDp = with(localDensity) { coordinates.size.height.toDp() }
+                    },
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Palette(
+                    generatorViewModel = generatorViewModel,
+                    colors = generatorUiState.currentPalette,
+                    numOfColors = generatorUiState.numberOfColours,
+                    heightAvailable = columnHeightDp
+                )
+            }
         }
     }
 }
 
 
 @Composable
-fun Palette(colors: List<com.example.palletify.data.Color>, numOfColors: Int, heightAvailable: Dp) {
+fun Palette(generatorViewModel: GeneratorViewModel, colors: List<com.example.palletify.data.Color>, numOfColors: Int, heightAvailable: Dp) {
     val heightPerColor = heightAvailable / numOfColors;
     // TODO: probably need to change this to be based on the number of colours so that we can add/subtract num of colours in a palette
     colors.forEach { color ->
-        ColorInPalette(color, heightPerColor)
+        ColorInPalette(generatorViewModel, color, heightPerColor)
     }
 }
 
@@ -135,7 +203,8 @@ fun calculateRgbFraction(color: Float): Double {
 }
 
 @Composable
-fun ColorInPalette(color: com.example.palletify.data.Color, heightPerColor: Dp) {
+fun ColorInPalette(generatorViewModel: GeneratorViewModel, color: com.example.palletify.data.Color, heightPerColor: Dp) {
+    val generatorUiState by generatorViewModel.uiState.collectAsStateWithLifecycle()
     val backgroundColor = Color(color.rgb.fraction.r, color.rgb.fraction.g, color.rgb.fraction.b)
     val luminosity =
         calculateLuminosity(color.rgb.fraction.r, color.rgb.fraction.g, color.rgb.fraction.b)
@@ -145,7 +214,9 @@ fun ColorInPalette(color: com.example.palletify.data.Color, heightPerColor: Dp) 
             .height(heightPerColor)
             .background(backgroundColor)
             .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+
     ) {
         Column(
             Modifier
@@ -162,6 +233,30 @@ fun ColorInPalette(color: com.example.palletify.data.Color, heightPerColor: Dp) 
                 color = if (luminosity >= 0.179) Color(35, 35, 35) else Color(230, 230, 230),
                 style = typography.labelMedium
             )
+        }
+
+        if (!generatorUiState.lockedColors.contains(color)) {
+            // Button to lock a colour
+            IconButton(
+                onClick = { generatorViewModel.handleLockForColor(color) }
+            ) {
+                Icon(
+                    Icons.Filled.LockOpen,
+                    contentDescription = "Lock a colour",
+                    tint = if (luminosity >= 0.179) Color.Black else Color.White
+                )
+            }
+        } else {
+            // Button to unlock a colour
+            IconButton(
+                onClick = { generatorViewModel.handleUnlockForColor(color) }
+            ) {
+                Icon(
+                    Icons.Filled.Lock,
+                    contentDescription = "Unlock a colour",
+                    tint = if (luminosity >= 0.179) Color.Black else Color.White
+                )
+            }
         }
     }
 }
