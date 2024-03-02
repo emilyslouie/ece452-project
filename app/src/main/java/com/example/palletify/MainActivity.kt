@@ -21,12 +21,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.example.palletify.ui.generator.GeneratorScreen
 import com.example.palletify.ui.preview.PreviewScreen
 import com.example.palletify.ui.theme.PalletifyTheme
-import androidx.compose.ui.Alignment
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Menu
@@ -39,12 +34,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.palletify.library.Library
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -111,7 +105,7 @@ fun NavDrawer() {
                         coroutineScope.launch {
                             drawerState.close()
                         }
-                        navigationController.navigate(Screens.PreviewColours.screen) {
+                        navigationController.navigate(Screens.PreviewScreen.screen) {
                             popUpTo(0)
                         }
                     })
@@ -144,7 +138,7 @@ fun NavDrawer() {
                 startDestination = Screens.Home.screen) {
                 composable(Screens.Home.screen) { GeneratorScreen() }
                 composable(Screens.Library.screen) { Library() }
-                composable(Screens.PreviewColours.screen) { PreviewColours() }
+                composable(Screens.PreviewScreen.screen) { PreviewScreen() }
             }
         }
 

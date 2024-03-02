@@ -1,4 +1,4 @@
-package com.example.palletify
+package com.example.palletify.library
 
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.layout.Arrangement
