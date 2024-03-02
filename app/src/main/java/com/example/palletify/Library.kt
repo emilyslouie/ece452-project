@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -26,19 +27,20 @@ import com.example.palletify.database.PaletteViewModel
 @Composable
 fun Library() {
     val palletViewModel: PaletteViewModel = viewModel()
-    val allPalletsState = palletViewModel.getAllPallets.collectAsState()
+    val allPalletsState = palletViewModel.getAllPalettes.collectAsState()
     Box(
         modifier = Modifier
             .fillMaxSize()
             .padding(top = 56.dp)
     ) {
         LazyColumn {
-            items(allPalletsState.value) { pallet ->
-                PalletItem(pallete = pallete)
+            items(allPalletsState.value) { palette ->
+                PaletteItem(palette = palette)
             }
         }
     }
 }
+
 
 @Composable
 fun PaletteItem(palette: Palette) {
