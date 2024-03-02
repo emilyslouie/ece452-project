@@ -58,22 +58,29 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material.icons.Icons
+import androidx.compose.runtime.getValue
 
 import androidx.compose.runtime.remember
 
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.palletify.ui.preview.PreviewViewModel
 import kotlin.random.Random
 
 @Composable
 fun OutlinedRadioButtonWithText(
     text: String,
     selected: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    color: Color
 ) {
     OutlinedButton(
         onClick = onClick,
+        colors = ButtonDefaults.buttonColors(contentColor = color, containerColor = Color.Transparent),
         modifier = Modifier
             .padding(start = 28.dp, end = 28.dp, top = 28.dp)
             .fillMaxWidth()
@@ -81,7 +88,8 @@ fun OutlinedRadioButtonWithText(
         Row (verticalAlignment = Alignment.CenterVertically) {
             RadioButton(
                 selected = selected,
-                onClick = onClick
+                onClick = onClick,
+                colors = RadioButtonDefaults.colors(selectedColor = color)
             )
             Text(
                 text = text,
@@ -135,7 +143,9 @@ fun GraphCard() {
                 }
             }
 
-            Canvas(modifier = Modifier.fillMaxWidth().height(200.dp)) {
+            Canvas(modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)) {
                 drawPath(
                     path = path,
                     color = colorScheme.onSurface,
@@ -198,26 +208,31 @@ fun ProfileCard(
 
 
 @Composable
-fun RadioButtonGroup() {
+fun RadioButtonGroup(
+    color: Color
+) {
     val selectedOption = remember { mutableStateOf("Option1") }
 
     Column {
         OutlinedRadioButtonWithText(
             text = "Radio Button - Option 1",
             selected = selectedOption.value == "Option1",
-            onClick = { selectedOption.value = "Option1" }
+            onClick = { selectedOption.value = "Option1" },
+            color = color
         )
         OutlinedRadioButtonWithText(
             text = "Radio Button - Option 2",
             selected = selectedOption.value == "Option2",
-            onClick = { selectedOption.value = "Option2" }
+            onClick = { selectedOption.value = "Option2" },
+            color = color
         )
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PreviewScreen() {
+fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
+    val previewUiState by previewViewModel.uiState.collectAsStateWithLifecycle()
     val imagePainter = painterResource(id = R.drawable.profile)
     val scrollState = rememberScrollState()
     Scaffold(
@@ -225,10 +240,37 @@ fun PreviewScreen() {
             TopAppBar(
                 title = { Text("Preview", color = Color.White) },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary
+                    containerColor = previewUiState.test
                 )
             )
-        }
+        },
+        bottomBar = {
+            BottomAppBar(
+                actions = {
+                    Button(
+                        onClick = {previewViewModel.setTest(Color.Red)},
+                        modifier = Modifier.size(36.dp),
+                        shape = CircleShape,
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                    ) {
+                    }
+                    Button(
+                        onClick = {previewViewModel.setTest(Color.Green)},
+                        modifier = Modifier.size(36.dp),
+                        shape = CircleShape,
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Green)
+                    ) {
+                    }
+                    Button(
+                        onClick = {previewViewModel.setTest(Color.Blue)},
+                        modifier = Modifier.size(36.dp),
+                        shape = CircleShape,
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Blue)
+                    ) {
+                    }
+                },
+            )
+        },
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -257,11 +299,12 @@ fun PreviewScreen() {
                     .fillMaxWidth()
                     .padding(start = 28.dp, end = 28.dp)
                     .heightIn(min = 55.dp),
-                onClick = { /* No action is triggered */ }
+                onClick = { /* No action is triggered */ },
+                colors = ButtonDefaults.buttonColors(containerColor = previewUiState.test)
             ) {
                 Text("Button")
             }
-            RadioButtonGroup()
+            RadioButtonGroup(previewUiState.test)
 
             ProfileCard(
                 profileImagePainter = imagePainter,
