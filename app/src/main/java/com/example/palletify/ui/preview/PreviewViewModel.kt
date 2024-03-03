@@ -1,8 +1,11 @@
 package com.example.palletify.ui.preview
 
+import androidx.compose.ui.graphics.Color
+import androidx.core.graphics.toColorInt
 import androidx.lifecycle.ViewModel
-import com.example.palletify.data.Palette.Color
-import com.example.palletify.ui.preview.PreviewUiState
+import com.example.palletify.data.Palette
+import com.example.palletify.data.fetchPalette
+import com.example.palletify.data.fetchRandomHex
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,25 +21,28 @@ class PreviewViewModel: ViewModel() {
     private val _uiState = MutableStateFlow(PreviewUiState())
     val uiState: StateFlow<PreviewUiState> = _uiState.asStateFlow()
 
-
-    // Set of colors that have already been used as a seed in the generator
-    private var usedSeedColors: MutableSet<String> = mutableSetOf()
-
     init {
         thread {
-
+            setPreviewTestData()
         }
     }
 
-    fun setTest(color: androidx.compose.ui.graphics.Color) {
+    fun setPreviewTestData() {
+        val randomHexResponse = fetchRandomHex();
+        val palette = fetchPalette(randomHexResponse);
         _uiState.update { currentState ->
             currentState.copy(
-                test = color
+                colors = palette.colors,
+                currentColor = palette.colors[0]
             )
         }
     }
 
-    fun setCurrentColor(color: Color) {
+    fun hexToComposeColor(hex: Palette.Hex): Color {
+        return Color(hex.value.toColorInt());
+    }
+
+    fun setCurrentColor(color: Palette.Color) {
         _uiState.update { currentState ->
             currentState.copy(
                 currentColor = color
