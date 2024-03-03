@@ -36,15 +36,11 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.navigation.NavController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import java.util.Objects
 import com.example.palletify.BuildConfig
 import com.example.palletify.Screens
-import com.example.palletify.ui.generator.GeneratorScreen
 import com.example.palletify.ui.image.createImageFile
 
 @OptIn(ExperimentalCoilApi::class, ExperimentalMaterial3Api::class)
