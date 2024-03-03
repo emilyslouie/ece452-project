@@ -145,9 +145,10 @@ fun NavDrawer() {
         ) {
             NavHost(navController = navigationController,
                 startDestination = Screens.Home.screen) {
-                composable(Screens.Home.screen) { HomeScreen() }
+                composable(Screens.Home.screen) { HomeScreen(navigationController) }
                 composable(Screens.Library.screen) { Library() }
                 composable(Screens.PreviewScreen.screen) { PreviewScreen() }
+                composable(Screens.GenerateScreen.screen) { GeneratorScreen() }
             }
         }
 

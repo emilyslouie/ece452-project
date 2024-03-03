@@ -1,6 +1,5 @@
 package com.example.palletify.ui.home
 
-import android.app.Activity
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.widget.Toast
@@ -14,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -37,18 +35,21 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.navigation.NavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import java.util.Objects
 import com.example.palletify.BuildConfig
+import com.example.palletify.Screens
+import com.example.palletify.ui.generator.GeneratorScreen
 import com.example.palletify.ui.image.createImageFile
-import com.example.palletify.ui.preview.GraphCard
-import com.example.palletify.ui.preview.ProfileCard
 
 @OptIn(ExperimentalCoilApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen() {
-
+fun HomeScreen(navigationController: NavController) {
     val context = LocalContext.current
     val file = context.createImageFile()
     val uri = FileProvider.getUriForFile(
@@ -60,7 +61,7 @@ fun HomeScreen() {
         mutableStateOf<Uri>(Uri.EMPTY)
     }
 
-    var imageUri by remember {
+    var uploadedImageUri by remember {
         mutableStateOf<Uri?>(null)
     }
 
@@ -82,7 +83,7 @@ fun HomeScreen() {
 
     val selectImageLauncher = rememberLauncherForActivityResult(contract =
     ActivityResultContracts.GetContent()) { uri: Uri? ->
-        imageUri = uri
+        uploadedImageUri = uri
     }
 
     Scaffold(
@@ -150,7 +151,7 @@ fun HomeScreen() {
                     .fillMaxWidth()
                     .padding(start = 28.dp, end = 28.dp)
                     .heightIn(min = 55.dp),
-                onClick = { /* No action is triggered */ }
+                onClick = { navigationController.navigate(Screens.GenerateScreen.screen) }
             ) {
                 Text("Randomly generate colours")
             }
@@ -174,5 +175,11 @@ fun HomeScreen() {
             contentDescription = null
         )
     }
+    if (uploadedImageUri?.path?.isNotEmpty() == true) {
+        Image(painter = rememberImagePainter(uploadedImageUri),
+             contentDescription = null,
+             modifier = Modifier.padding(16.dp, 8.dp)
+        )
+    }
 
-}
+    }
