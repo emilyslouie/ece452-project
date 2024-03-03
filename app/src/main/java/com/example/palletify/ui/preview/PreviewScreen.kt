@@ -312,7 +312,7 @@ fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
 
             AccessibleComponentWrapper(
                 foregroundColor = previewViewModel.hexToComposeColor(previewUiState.currentColor.hex),
-                backgroundColor = Color.White
+                backgroundColor = MaterialTheme.colorScheme.surface
             ) {
                 ProfileCard(
                     profileImagePainter = imagePainter,
@@ -323,7 +323,7 @@ fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
             }
             AccessibleComponentWrapper(
                 foregroundColor = previewViewModel.hexToComposeColor(previewUiState.currentColor.hex),
-                backgroundColor = Color.White
+                backgroundColor = MaterialTheme.colorScheme.surface
             ) {
                 GraphCard(previewViewModel.hexToComposeColor(previewUiState.currentColor.hex))
             }
