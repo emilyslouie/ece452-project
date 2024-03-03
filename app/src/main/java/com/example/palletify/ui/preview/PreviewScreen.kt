@@ -102,13 +102,15 @@ fun OutlinedRadioButtonWithText(
 }
 
 @Composable
-fun GraphCard() {
+fun GraphCard(
+    color: Color
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        shape = MaterialTheme.shapes.medium
+        shape = MaterialTheme.shapes.medium,
     ) {
         BoxWithConstraints(
             modifier = Modifier.padding(16.dp)
@@ -148,7 +150,7 @@ fun GraphCard() {
                 .height(200.dp)) {
                 drawPath(
                     path = path,
-                    color = colorScheme.onSurface,
+                    color = color,
                     style = Stroke(width = 3.dp.toPx())
                 )
             }
@@ -160,13 +162,15 @@ fun GraphCard() {
 fun ProfileCard(
     profileImagePainter: Painter,
     primaryText: String,
-    secondaryText: String
+    secondaryText: String,
+    color: Color,
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 28.dp, end = 28.dp, top = 28.dp, bottom = 28.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(contentColor = color)
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -298,7 +302,8 @@ fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
             ProfileCard(
                 profileImagePainter = imagePainter,
                 primaryText = "John Preview Doe",
-                secondaryText = "Software Engineer at Palletify Corp"
+                secondaryText = "Software Engineer at Palletify Corp",
+                color = previewViewModel.hexToComposeColor(previewUiState.currentColor.hex)
             )
 //            Card(
 //                modifier = Modifier
@@ -314,7 +319,7 @@ fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
 //
 //                }
 //            }
-            GraphCard()
+            GraphCard(previewViewModel.hexToComposeColor(previewUiState.currentColor.hex))
         }
     }
 }
