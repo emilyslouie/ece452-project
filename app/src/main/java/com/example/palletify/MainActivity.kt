@@ -1,6 +1,6 @@
 package com.example.palletify
 
-import com.example.palletify.ui.image.AppContent
+import com.example.palletify.ui.home.HomeScreen
 import android.net.Uri
 import android.annotation.SuppressLint
 import android.os.Bundle
@@ -23,7 +23,6 @@ import java.util.concurrent.ExecutorService
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import com.example.palletify.ui.generator.GeneratorScreen
@@ -47,6 +46,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.palletify.library.Library
+import com.example.palletify.ui.home.HomeScreen
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -145,7 +145,7 @@ fun NavDrawer() {
         ) {
             NavHost(navController = navigationController,
                 startDestination = Screens.Home.screen) {
-                composable(Screens.Home.screen) { GeneratorScreen() }
+                composable(Screens.Home.screen) { HomeScreen() }
                 composable(Screens.Library.screen) { Library() }
                 composable(Screens.PreviewScreen.screen) { PreviewScreen() }
             }
