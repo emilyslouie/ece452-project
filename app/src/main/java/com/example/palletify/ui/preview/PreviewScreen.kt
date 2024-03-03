@@ -240,33 +240,22 @@ fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
             TopAppBar(
                 title = { Text("Preview", color = Color.White) },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = previewUiState.test
+                    containerColor = previewViewModel.hexToComposeColor(previewUiState.currentColor.hex)
                 )
             )
         },
         bottomBar = {
             BottomAppBar(
                 actions = {
-                    Button(
-                        onClick = {previewViewModel.setTest(Color.Red)},
-                        modifier = Modifier.size(36.dp),
-                        shape = CircleShape,
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
-                    ) {
-                    }
-                    Button(
-                        onClick = {previewViewModel.setTest(Color.Green)},
-                        modifier = Modifier.size(36.dp),
-                        shape = CircleShape,
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.Green)
-                    ) {
-                    }
-                    Button(
-                        onClick = {previewViewModel.setTest(Color.Blue)},
-                        modifier = Modifier.size(36.dp),
-                        shape = CircleShape,
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.Blue)
-                    ) {
+                    previewUiState.colors.forEach { color ->
+                        Button(
+                            onClick = {previewViewModel.setCurrentColor(color)},
+                            modifier = Modifier
+                                .size(48.dp)
+                                .padding(8.dp),
+                            shape = CircleShape,
+                            colors = ButtonDefaults.buttonColors(containerColor = previewViewModel.hexToComposeColor(color.hex))
+                        ) {}
                     }
                 },
             )
@@ -300,11 +289,11 @@ fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
                     .padding(start = 28.dp, end = 28.dp)
                     .heightIn(min = 55.dp),
                 onClick = { /* No action is triggered */ },
-                colors = ButtonDefaults.buttonColors(containerColor = previewUiState.test)
+                colors = ButtonDefaults.buttonColors(containerColor = previewViewModel.hexToComposeColor(previewUiState.currentColor.hex))
             ) {
                 Text("Button")
             }
-            RadioButtonGroup(previewUiState.test)
+            RadioButtonGroup(previewViewModel.hexToComposeColor(previewUiState.currentColor.hex))
 
             ProfileCard(
                 profileImagePainter = imagePainter,
