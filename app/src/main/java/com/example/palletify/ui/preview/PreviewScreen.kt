@@ -105,13 +105,15 @@ fun OutlinedRadioButtonWithText(
 }
 
 @Composable
-fun GraphCard() {
+fun GraphCard(
+    color: Color
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        shape = MaterialTheme.shapes.medium
+        shape = MaterialTheme.shapes.medium,
     ) {
         BoxWithConstraints(
             modifier = Modifier.padding(16.dp)
@@ -151,7 +153,7 @@ fun GraphCard() {
                 .height(200.dp)) {
                 drawPath(
                     path = path,
-                    color = colorScheme.onSurface,
+                    color = color,
                     style = Stroke(width = 3.dp.toPx())
                 )
             }
@@ -163,13 +165,15 @@ fun GraphCard() {
 fun ProfileCard(
     profileImagePainter: Painter,
     primaryText: String,
-    secondaryText: String
+    secondaryText: String,
+    color: Color,
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 28.dp, end = 28.dp, top = 28.dp, bottom = 28.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(contentColor = color)
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -244,33 +248,22 @@ fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
             TopAppBar(
                 title = { Text("Preview", color = Color.White) },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = previewUiState.test
+                    containerColor = previewViewModel.hexToComposeColor(previewUiState.currentColor.hex)
                 )
             )
         },
         bottomBar = {
             BottomAppBar(
                 actions = {
-                    Button(
-                        onClick = {previewViewModel.setTest(Color.Red)},
-                        modifier = Modifier.size(36.dp),
-                        shape = CircleShape,
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
-                    ) {
-                    }
-                    Button(
-                        onClick = {previewViewModel.setTest(Color.Green)},
-                        modifier = Modifier.size(36.dp),
-                        shape = CircleShape,
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.Green)
-                    ) {
-                    }
-                    Button(
-                        onClick = {previewViewModel.setTest(Color.Blue)},
-                        modifier = Modifier.size(36.dp),
-                        shape = CircleShape,
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.Blue)
-                    ) {
+                    previewUiState.colors.forEach { color ->
+                        Button(
+                            onClick = {previewViewModel.setCurrentColor(color)},
+                            modifier = Modifier
+                                .size(48.dp)
+                                .padding(8.dp),
+                            shape = CircleShape,
+                            colors = ButtonDefaults.buttonColors(containerColor = previewViewModel.hexToComposeColor(color.hex))
+                        ) {}
                     }
                 },
             )
@@ -298,9 +291,13 @@ fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
                     modifier = Modifier.fillMaxWidth()
                 )
             }
-            AccessibleComponentWrapper(
-                foregroundColor = Color.White,
-                backgroundColor = previewUiState.test
+            Button(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 28.dp, end = 28.dp)
+                    .heightIn(min = 55.dp),
+                onClick = { /* No action is triggered */ },
+                colors = ButtonDefaults.buttonColors(containerColor = previewViewModel.hexToComposeColor(previewUiState.currentColor.hex))
             ) {
                 Button(
                     modifier = Modifier
@@ -313,17 +310,29 @@ fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
                     Text("Button")
                 }
             }
-            AccessibleComponentWrapper(
-                foregroundColor = previewUiState.test,
-                backgroundColor = Color.White
-            ){ RadioButtonGroup(previewUiState.test) }
+            RadioButtonGroup(previewViewModel.hexToComposeColor(previewUiState.currentColor.hex))
 
             ProfileCard(
                 profileImagePainter = imagePainter,
                 primaryText = "John Preview Doe",
-                secondaryText = "Software Engineer at Palletify Corp"
+                secondaryText = "Software Engineer at Palletify Corp",
+                color = previewViewModel.hexToComposeColor(previewUiState.currentColor.hex)
             )
-            GraphCard()
+//            Card(
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .padding(start = 28.dp, end = 28.dp),
+//                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+//            ) {
+//                Column(
+//                    modifier = Modifier.padding(16.dp)
+//                ) {
+//                    Text("Some Primary Text", style = MaterialTheme.typography.headlineSmall)
+//                    Text("Some secondary text", style = MaterialTheme.typography.bodyMedium)
+//
+//                }
+//            }
+            GraphCard(previewViewModel.hexToComposeColor(previewUiState.currentColor.hex))
         }
     }
 }
