@@ -34,6 +34,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 
 import com.example.palletify.ui.theme.PalletifyTheme
+import com.example.palletify.ui.preview.ColorUtils.contrastRatio
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -59,8 +60,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.runtime.getValue
 
+import com.example.palletify.ui.preview.AccessibleComponentWrapper
 import androidx.compose.runtime.remember
 
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -229,6 +232,7 @@ fun RadioButtonGroup(
     }
 }
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
@@ -294,37 +298,31 @@ fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
                     modifier = Modifier.fillMaxWidth()
                 )
             }
-            Button(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 28.dp, end = 28.dp)
-                    .heightIn(min = 55.dp),
-                onClick = { /* No action is triggered */ },
-                colors = ButtonDefaults.buttonColors(containerColor = previewUiState.test)
+            AccessibleComponentWrapper(
+                foregroundColor = Color.White,
+                backgroundColor = previewUiState.test
             ) {
-                Text("Button")
+                Button(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 28.dp, end = 28.dp)
+                        .heightIn(min = 55.dp),
+                    onClick = { /* No action is triggered */ },
+                    colors = ButtonDefaults.buttonColors(containerColor = previewUiState.test)
+                ) {
+                    Text("Button")
+                }
             }
-            RadioButtonGroup(previewUiState.test)
+            AccessibleComponentWrapper(
+                foregroundColor = previewUiState.test,
+                backgroundColor = Color.White
+            ){ RadioButtonGroup(previewUiState.test) }
 
             ProfileCard(
                 profileImagePainter = imagePainter,
                 primaryText = "John Preview Doe",
                 secondaryText = "Software Engineer at Palletify Corp"
             )
-//            Card(
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .padding(start = 28.dp, end = 28.dp),
-//                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-//            ) {
-//                Column(
-//                    modifier = Modifier.padding(16.dp)
-//                ) {
-//                    Text("Some Primary Text", style = MaterialTheme.typography.headlineSmall)
-//                    Text("Some secondary text", style = MaterialTheme.typography.bodyMedium)
-//
-//                }
-//            }
             GraphCard()
         }
     }
