@@ -9,8 +9,11 @@
 | 02/25/2024 |      |          |     |              |         |    3   | Adding functioning photo capturing feature                       |
 | 02/26/2024 |      |          | 6   |              |         |        | Implement undo/redo for generating palettes                      |
 | 02/27/2024 |      |          |     |      6.5     |         |        | Add Preview screen and various UI elements in it                 |
+| 02/28/2024 |      |          |     |              |    3    |        | Add colour selection for preview                                 |
 | 02/28/2024 | 6    |          |     |              |         |        | Implement UI and API calls to lock/unlock colours                |
 | 02/28/2024 | 0.5  |          |     |              |         |        | Persist locked colours across undo/redo state changes            |
 | 02/28/2024 |      |          |     |              |         |    4   | Refactoring photo capturing to better fit software architecture  |
 | 03/01/2024 |      |    6     |     |              |         |        | Saving colours locally to database, screen updates               |
 | 03/02/2024 |      |          |     |              |         |    2   | Adding image importing functionality                             |
+| 03/02/2024 |      |          |     |              |    1    |    2   | Refactor Model into separate files and fix conflicts             |
+
