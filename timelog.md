@@ -15,5 +15,6 @@
 | 02/28/2024 |      |          |     |              |         |    4   | Refactoring photo capturing to better fit software architecture  |
 | 03/01/2024 |      |    6     |     |              |         |        | Saving colours locally to database, screen updates               |
 | 03/02/2024 |      |          |     |              |         |    2   | Adding image importing functionality                             |
-| 03/02/2024 |      |          |     |              |    1    |    2   | Refactor Model into separate files and fix conflicts             |
+| 03/02/2024 |      |          |     |              |    1    |        | Refactor Model into separate files and fix conflicts             |
 | 03/02/2024 |      |          |     |      4       |         |        | Accessibility checker                                            |
+| 03/03/2024 |      |          |     |              |         |    1   | Add sample image color template                                  |
