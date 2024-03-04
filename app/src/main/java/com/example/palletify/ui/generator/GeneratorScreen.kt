@@ -179,7 +179,7 @@ fun GeneratorScreen(generatorViewModel: GeneratorViewModel = viewModel()) {
 
 
 @Composable
-fun Palette(generatorViewModel: GeneratorViewModel, colors: List<com.example.palletify.data.Color>, numOfColors: Int, heightAvailable: Dp) {
+fun Palette(generatorViewModel: GeneratorViewModel, colors: List<com.example.palletify.data.Palette.Color>, numOfColors: Int, heightAvailable: Dp) {
     val heightPerColor = heightAvailable / numOfColors;
     // TODO: probably need to change this to be based on the number of colours so that we can add/subtract num of colours in a palette
     colors.forEach { color ->
@@ -203,7 +203,7 @@ fun calculateRgbFraction(color: Float): Double {
 }
 
 @Composable
-fun ColorInPalette(generatorViewModel: GeneratorViewModel, color: com.example.palletify.data.Color, heightPerColor: Dp) {
+fun ColorInPalette(generatorViewModel: GeneratorViewModel, color: com.example.palletify.data.Palette.Color, heightPerColor: Dp) {
     val generatorUiState by generatorViewModel.uiState.collectAsStateWithLifecycle()
     val backgroundColor = Color(color.rgb.fraction.r, color.rgb.fraction.g, color.rgb.fraction.b)
     val luminosity =
