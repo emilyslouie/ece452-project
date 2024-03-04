@@ -16,4 +16,4 @@
 | 03/01/2024 |      |    6     |     |              |         |        | Saving colours locally to database, screen updates               |
 | 03/02/2024 |      |          |     |              |         |    2   | Adding image importing functionality                             |
 | 03/02/2024 |      |          |     |              |    1    |    2   | Refactor Model into separate files and fix conflicts             |
-
+| 03/02/2024 |      |          |     |      4       |         |        | Accessibility checker                                            |
