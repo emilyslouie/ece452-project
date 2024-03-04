@@ -1,8 +1,8 @@
 package com.example.palletify.ui.generator
 
 import androidx.lifecycle.ViewModel
-import com.example.palletify.data.Color
-import com.example.palletify.data.Image
+import com.example.palletify.data.Palette.Color
+import com.example.palletify.data.Palette.Image
 import com.example.palletify.data.fetchPalette
 import com.example.palletify.data.fetchRandomHex
 import kotlinx.coroutines.flow.MutableStateFlow
