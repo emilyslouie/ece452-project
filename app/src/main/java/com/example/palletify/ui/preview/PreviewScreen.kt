@@ -34,6 +34,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 
 import com.example.palletify.ui.theme.PalletifyTheme
+import com.example.palletify.ui.preview.ColorUtils.contrastRatio
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -59,8 +60,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.runtime.getValue
 
+import com.example.palletify.ui.preview.AccessibleComponentWrapper
 import androidx.compose.runtime.remember
 
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -179,7 +182,6 @@ fun ProfileCard(
             Box(
                 modifier = Modifier
                     .size(48.dp),
-//                    .border(2.dp, Color.Gray, CircleShape), // Circular border
                 contentAlignment = Alignment.Center
             ) {
                 Image(
@@ -198,8 +200,7 @@ fun ProfileCard(
                 Text(
                     primaryText,
                     style = TextStyle(
-                        fontSize = 25.sp,
-//                        textAlign = TextAlign.Center,
+                        fontSize = 25.sp
                     ),
                     modifier = Modifier
                         .fillMaxWidth()
@@ -232,6 +233,7 @@ fun RadioButtonGroup(
         )
     }
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -287,39 +289,44 @@ fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
                     modifier = Modifier.fillMaxWidth()
                 )
             }
-            Button(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 28.dp, end = 28.dp)
-                    .heightIn(min = 55.dp),
-                onClick = { /* No action is triggered */ },
-                colors = ButtonDefaults.buttonColors(containerColor = previewViewModel.hexToComposeColor(previewUiState.currentColor.hex))
+            AccessibleComponentWrapper(
+                foregroundColor = Color.White,
+                backgroundColor = previewViewModel.hexToComposeColor(previewUiState.currentColor.hex)
             ) {
-                Text("Button")
-            }
-            RadioButtonGroup(previewViewModel.hexToComposeColor(previewUiState.currentColor.hex))
+                Button(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 28.dp, end = 28.dp)
+                        .heightIn(min = 55.dp),
+                    onClick = { /* No action is triggered */ },
+                    colors = ButtonDefaults.buttonColors(containerColor = previewViewModel.hexToComposeColor(previewUiState.currentColor.hex))
+                ) {
 
-            ProfileCard(
-                profileImagePainter = imagePainter,
-                primaryText = "John Preview Doe",
-                secondaryText = "Software Engineer at Palletify Corp",
-                color = previewViewModel.hexToComposeColor(previewUiState.currentColor.hex)
-            )
-//            Card(
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .padding(start = 28.dp, end = 28.dp),
-//                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-//            ) {
-//                Column(
-//                    modifier = Modifier.padding(16.dp)
-//                ) {
-//                    Text("Some Primary Text", style = MaterialTheme.typography.headlineSmall)
-//                    Text("Some secondary text", style = MaterialTheme.typography.bodyMedium)
-//
-//                }
-//            }
-            GraphCard(previewViewModel.hexToComposeColor(previewUiState.currentColor.hex))
+                    Text("Button")
+                }
+            }
+            AccessibleComponentWrapper(
+                foregroundColor = previewViewModel.hexToComposeColor(previewUiState.currentColor.hex),
+                backgroundColor = Color.White
+            ) { RadioButtonGroup(previewViewModel.hexToComposeColor(previewUiState.currentColor.hex)) }
+
+            AccessibleComponentWrapper(
+                foregroundColor = previewViewModel.hexToComposeColor(previewUiState.currentColor.hex),
+                backgroundColor = MaterialTheme.colorScheme.surface
+            ) {
+                ProfileCard(
+                    profileImagePainter = imagePainter,
+                    primaryText = "John Preview Doe",
+                    secondaryText = "Software Engineer at Palletify Corp",
+                    color = previewViewModel.hexToComposeColor(previewUiState.currentColor.hex)
+                )
+            }
+            AccessibleComponentWrapper(
+                foregroundColor = previewViewModel.hexToComposeColor(previewUiState.currentColor.hex),
+                backgroundColor = MaterialTheme.colorScheme.surface
+            ) {
+                GraphCard(previewViewModel.hexToComposeColor(previewUiState.currentColor.hex))
+            }
         }
     }
 }
