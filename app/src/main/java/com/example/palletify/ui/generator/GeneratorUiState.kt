@@ -1,7 +1,7 @@
 package com.example.palletify.ui.generator
 
-import com.example.palletify.data.Color
-import com.example.palletify.data.Image
+import com.example.palletify.data.Palette.Color
+import com.example.palletify.data.Palette.Image
 
 /**
  * Data class that represents the generator's UI state

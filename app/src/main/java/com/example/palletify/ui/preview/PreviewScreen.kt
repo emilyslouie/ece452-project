@@ -34,6 +34,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 
 import com.example.palletify.ui.theme.PalletifyTheme
+import com.example.palletify.ui.preview.ColorUtils.contrastRatio
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -58,22 +59,31 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.runtime.getValue
 
+import com.example.palletify.ui.preview.AccessibleComponentWrapper
 import androidx.compose.runtime.remember
 
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.palletify.ui.preview.PreviewViewModel
 import kotlin.random.Random
 
 @Composable
 fun OutlinedRadioButtonWithText(
     text: String,
     selected: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    color: Color
 ) {
     OutlinedButton(
         onClick = onClick,
+        colors = ButtonDefaults.buttonColors(contentColor = color, containerColor = Color.Transparent),
         modifier = Modifier
             .padding(start = 28.dp, end = 28.dp, top = 28.dp)
             .fillMaxWidth()
@@ -81,7 +91,8 @@ fun OutlinedRadioButtonWithText(
         Row (verticalAlignment = Alignment.CenterVertically) {
             RadioButton(
                 selected = selected,
-                onClick = onClick
+                onClick = onClick,
+                colors = RadioButtonDefaults.colors(selectedColor = color)
             )
             Text(
                 text = text,
@@ -94,13 +105,15 @@ fun OutlinedRadioButtonWithText(
 }
 
 @Composable
-fun GraphCard() {
+fun GraphCard(
+    color: Color
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        shape = MaterialTheme.shapes.medium
+        shape = MaterialTheme.shapes.medium,
     ) {
         BoxWithConstraints(
             modifier = Modifier.padding(16.dp)
@@ -135,10 +148,12 @@ fun GraphCard() {
                 }
             }
 
-            Canvas(modifier = Modifier.fillMaxWidth().height(200.dp)) {
+            Canvas(modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)) {
                 drawPath(
                     path = path,
-                    color = colorScheme.onSurface,
+                    color = color,
                     style = Stroke(width = 3.dp.toPx())
                 )
             }
@@ -150,13 +165,15 @@ fun GraphCard() {
 fun ProfileCard(
     profileImagePainter: Painter,
     primaryText: String,
-    secondaryText: String
+    secondaryText: String,
+    color: Color,
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 28.dp, end = 28.dp, top = 28.dp, bottom = 28.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(contentColor = color)
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -165,7 +182,6 @@ fun ProfileCard(
             Box(
                 modifier = Modifier
                     .size(48.dp),
-//                    .border(2.dp, Color.Gray, CircleShape), // Circular border
                 contentAlignment = Alignment.Center
             ) {
                 Image(
@@ -184,8 +200,7 @@ fun ProfileCard(
                 Text(
                     primaryText,
                     style = TextStyle(
-                        fontSize = 25.sp,
-//                        textAlign = TextAlign.Center,
+                        fontSize = 25.sp
                     ),
                     modifier = Modifier
                         .fillMaxWidth()
@@ -198,26 +213,32 @@ fun ProfileCard(
 
 
 @Composable
-fun RadioButtonGroup() {
+fun RadioButtonGroup(
+    color: Color
+) {
     val selectedOption = remember { mutableStateOf("Option1") }
 
     Column {
         OutlinedRadioButtonWithText(
             text = "Radio Button - Option 1",
             selected = selectedOption.value == "Option1",
-            onClick = { selectedOption.value = "Option1" }
+            onClick = { selectedOption.value = "Option1" },
+            color = color
         )
         OutlinedRadioButtonWithText(
             text = "Radio Button - Option 2",
             selected = selectedOption.value == "Option2",
-            onClick = { selectedOption.value = "Option2" }
+            onClick = { selectedOption.value = "Option2" },
+            color = color
         )
     }
 }
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PreviewScreen() {
+fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
+    val previewUiState by previewViewModel.uiState.collectAsStateWithLifecycle()
     val imagePainter = painterResource(id = R.drawable.profile)
     val scrollState = rememberScrollState()
     Scaffold(
@@ -225,10 +246,26 @@ fun PreviewScreen() {
             TopAppBar(
                 title = { Text("Preview", color = Color.White) },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary
+                    containerColor = previewViewModel.hexToComposeColor(previewUiState.currentColor.hex)
                 )
             )
-        }
+        },
+        bottomBar = {
+            BottomAppBar(
+                actions = {
+                    previewUiState.colors.forEach { color ->
+                        Button(
+                            onClick = {previewViewModel.setCurrentColor(color)},
+                            modifier = Modifier
+                                .size(48.dp)
+                                .padding(8.dp),
+                            shape = CircleShape,
+                            colors = ButtonDefaults.buttonColors(containerColor = previewViewModel.hexToComposeColor(color.hex))
+                        ) {}
+                    }
+                },
+            )
+        },
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -252,37 +289,44 @@ fun PreviewScreen() {
                     modifier = Modifier.fillMaxWidth()
                 )
             }
-            Button(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 28.dp, end = 28.dp)
-                    .heightIn(min = 55.dp),
-                onClick = { /* No action is triggered */ }
+            AccessibleComponentWrapper(
+                foregroundColor = Color.White,
+                backgroundColor = previewViewModel.hexToComposeColor(previewUiState.currentColor.hex)
             ) {
-                Text("Button")
-            }
-            RadioButtonGroup()
+                Button(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 28.dp, end = 28.dp)
+                        .heightIn(min = 55.dp),
+                    onClick = { /* No action is triggered */ },
+                    colors = ButtonDefaults.buttonColors(containerColor = previewViewModel.hexToComposeColor(previewUiState.currentColor.hex))
+                ) {
 
-            ProfileCard(
-                profileImagePainter = imagePainter,
-                primaryText = "John Preview Doe",
-                secondaryText = "Software Engineer at Palletify Corp"
-            )
-//            Card(
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .padding(start = 28.dp, end = 28.dp),
-//                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-//            ) {
-//                Column(
-//                    modifier = Modifier.padding(16.dp)
-//                ) {
-//                    Text("Some Primary Text", style = MaterialTheme.typography.headlineSmall)
-//                    Text("Some secondary text", style = MaterialTheme.typography.bodyMedium)
-//
-//                }
-//            }
-            GraphCard()
+                    Text("Button")
+                }
+            }
+            AccessibleComponentWrapper(
+                foregroundColor = previewViewModel.hexToComposeColor(previewUiState.currentColor.hex),
+                backgroundColor = Color.White
+            ) { RadioButtonGroup(previewViewModel.hexToComposeColor(previewUiState.currentColor.hex)) }
+
+            AccessibleComponentWrapper(
+                foregroundColor = previewViewModel.hexToComposeColor(previewUiState.currentColor.hex),
+                backgroundColor = MaterialTheme.colorScheme.surface
+            ) {
+                ProfileCard(
+                    profileImagePainter = imagePainter,
+                    primaryText = "John Preview Doe",
+                    secondaryText = "Software Engineer at Palletify Corp",
+                    color = previewViewModel.hexToComposeColor(previewUiState.currentColor.hex)
+                )
+            }
+            AccessibleComponentWrapper(
+                foregroundColor = previewViewModel.hexToComposeColor(previewUiState.currentColor.hex),
+                backgroundColor = MaterialTheme.colorScheme.surface
+            ) {
+                GraphCard(previewViewModel.hexToComposeColor(previewUiState.currentColor.hex))
+            }
         }
     }
 }
