@@ -21,9 +21,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -56,6 +59,7 @@ import java.util.Objects
 import com.example.palletify.BuildConfig
 import com.example.palletify.R
 import com.example.palletify.Screens
+import com.example.palletify.ui.generator.GenerateWithImageScreen
 import com.example.palletify.ui.image.createImageFile
 
 @OptIn(ExperimentalCoilApi::class, ExperimentalMaterial3Api::class, ExperimentalStdlibApi::class)
@@ -119,7 +123,7 @@ fun HomeScreen(navigationController: NavController) {
                     .padding(28.dp)
             ) {
                 Text(
-                    text = "Welcome to Palletify Preview!",
+                    text = "Welcome to Palletify!",
                     style = TextStyle(
                         fontSize = 24.sp,
                         textAlign = TextAlign.Center
@@ -178,77 +182,9 @@ fun HomeScreen(navigationController: NavController) {
     }
 
     if (capturedImageUri.path?.isNotEmpty() == true) {
-        Image(
-            modifier = Modifier
-                .padding(16.dp, 8.dp),
-            painter = rememberImagePainter(capturedImageUri),
-            contentDescription = null
-        )
+        GenerateWithImageScreen(capturedImageUri)
     }
     if (uploadedImageUri?.path?.isNotEmpty() == true) {
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = { Text("Preview", color = Color.White) },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.primary
-                    )
-                )
-            }
-        ) { innerPadding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Image(
-                    painter = rememberImagePainter(uploadedImageUri),
-                    contentDescription = null,
-//                modifier = Modifier.padding(16.dp, 8.dp)
-                )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    Button(
-                        modifier = Modifier
-                            .padding(top = 8.dp)
-                            .heightIn(min = 55.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red,),
-                        onClick = { /* No action is triggered */ }
-                    ) {
-                        Text("")
-                    }
-                    Button(
-                        modifier = Modifier
-                            .padding(top = 8.dp)
-                            .heightIn(min = 55.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.Yellow,),
-                        onClick = { /* No action is triggered */ }
-                    ) {
-                        Text("")
-                    }
-                    Button(
-                        modifier = Modifier
-                            .padding(top = 8.dp)
-                            .heightIn(min = 55.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
-                        onClick = { /* No action is triggered */ }
-                    ) {
-                        Text("")
-                    }
-                    Button(
-                        modifier = Modifier
-                            .padding(top = 8.dp)
-                            .heightIn(min = 55.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.Blue,),
-                        onClick = { /* No action is triggered */ }
-                    ) {
-                        Text("")
-                    }
-                }
-            }
-        }
+        GenerateWithImageScreen(uploadedImageUri)
     }
 }
