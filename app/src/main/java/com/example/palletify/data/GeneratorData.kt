@@ -67,4 +67,3 @@ data class PaletteResponseBody(
     val image: Image,
     val seed: Color,
 )
-
