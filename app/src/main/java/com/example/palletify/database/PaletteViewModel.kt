@@ -10,14 +10,14 @@ import kotlinx.coroutines.launch
 
 class PaletteViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val repository: PaletteRepository
+    private val repository: PaletteInterface
 
     private val _allPalettes = MutableStateFlow<List<Palette>>(emptyList())
     val getAllPalettes: StateFlow<List<Palette>> = _allPalettes
 
     init {
         val paletteDao = PaletteDatabase.getDatabase(application).paletteDao()
-        repository = PaletteRepository(paletteDao)
+        repository = PaletteInterface(paletteDao)
 
 
         viewModelScope.launch {
