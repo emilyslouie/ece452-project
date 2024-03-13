@@ -1,6 +1,7 @@
 package com.example.palletify.ui.generator
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,10 +18,10 @@ import androidx.compose.material.icons.automirrored.filled.Redo
 import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
-import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.typography
@@ -30,6 +31,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,7 +39,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -45,9 +46,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.palletify.R
 import com.example.palletify.database.Palette
 import com.example.palletify.database.PaletteViewModel
+import com.example.palletify.ui.components.BottomSheet
 import com.example.palletify.ui.theme.PalletifyTheme
 import kotlin.concurrent.thread
 import kotlin.math.pow
@@ -62,6 +63,44 @@ fun GeneratorScreen(generatorViewModel: GeneratorViewModel = viewModel()) {
     val context = LocalContext.current
     val paletteViewModel =
         ViewModelProvider(context as ViewModelStoreOwner)[PaletteViewModel::class.java]
+
+    var activeColor by rememberSaveable {
+        mutableStateOf<com.example.palletify.data.Palette.Color?>(
+            null
+        )
+    }
+
+    // Bottom sheet that is shown when clicking on the name the color
+    if (activeColor != null) {
+        BottomSheet(onDismiss = { activeColor = null }) {
+            Column(Modifier.padding(top = 16.dp, bottom = 16.dp)) {
+                Row(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                    Text(modifier = Modifier.clickable(
+                        enabled = generatorUiState.numberOfColours < 6,
+                        onClick = {
+                            generatorViewModel.handleIncreaseNumOfColors(
+                                activeColor!!
+                            )
+                            activeColor = null
+                        }
+                    ), text = "Add color")
+                }
+                HorizontalDivider()
+                Row(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                    Text(modifier = Modifier.clickable(
+                        enabled = generatorUiState.numberOfColours > 3,
+                        onClick = {
+                            generatorViewModel.handleDecreaseNumOfColors(
+                                activeColor!!
+                            )
+                            activeColor = null
+                        }
+                    ), text = "Remove color")
+                }
+            }
+
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -101,12 +140,12 @@ fun GeneratorScreen(generatorViewModel: GeneratorViewModel = viewModel()) {
                                 // TODO: Send multiple requests for each seed, then combine results into one palette
                             } else {
                                 // If no locked colours, generate palette with random seed
-                                thread { generatorViewModel.getNewRandomPalette() }
+                                thread { generatorViewModel.getNewRandomPalette(numberOfColours = generatorUiState.numberOfColours) }
                             }
                         }) {
                             Text(
                                 modifier = Modifier.padding(end = 4.dp),
-                                text = stringResource(R.string.generate),
+                                text = "Generate",
                                 style = typography.titleLarge
                             )
                             Icon(Icons.Filled.Refresh, contentDescription = "Regenerate")
@@ -144,11 +183,6 @@ fun GeneratorScreen(generatorViewModel: GeneratorViewModel = viewModel()) {
                                 text = "Save",
                                 style = typography.titleLarge
                             )
-                            Icon(
-                                Icons.Filled.AddCircle,
-                                contentDescription = "Localized description"
-                            )
-
                         }
                     }
                 }
@@ -171,7 +205,10 @@ fun GeneratorScreen(generatorViewModel: GeneratorViewModel = viewModel()) {
                     generatorViewModel = generatorViewModel,
                     colors = generatorUiState.currentPalette,
                     numOfColors = generatorUiState.numberOfColours,
-                    heightAvailable = columnHeightDp
+                    heightAvailable = columnHeightDp,
+                    onItemClick = { selectedColor ->
+                        activeColor = selectedColor
+                    }
                 )
             }
         }
@@ -180,11 +217,21 @@ fun GeneratorScreen(generatorViewModel: GeneratorViewModel = viewModel()) {
 
 
 @Composable
-fun Palette(generatorViewModel: GeneratorViewModel, colors: List<com.example.palletify.data.Palette.Color>, numOfColors: Int, heightAvailable: Dp) {
+fun Palette(
+    generatorViewModel: GeneratorViewModel,
+    colors: List<com.example.palletify.data.Palette.Color>,
+    numOfColors: Int,
+    heightAvailable: Dp,
+    onItemClick: (com.example.palletify.data.Palette.Color) -> Unit
+) {
     val heightPerColor = heightAvailable / numOfColors;
-    // TODO: probably need to change this to be based on the number of colours so that we can add/subtract num of colours in a palette
     colors.forEach { color ->
-        ColorInPalette(generatorViewModel, color, heightPerColor)
+        ColorInPalette(
+            generatorViewModel,
+            color,
+            heightPerColor,
+            onItemClick
+        )
     }
 }
 
@@ -204,7 +251,12 @@ fun calculateRgbFraction(color: Float): Double {
 }
 
 @Composable
-fun ColorInPalette(generatorViewModel: GeneratorViewModel, color: com.example.palletify.data.Palette.Color, heightPerColor: Dp) {
+fun ColorInPalette(
+    generatorViewModel: GeneratorViewModel,
+    color: com.example.palletify.data.Palette.Color,
+    heightPerColor: Dp,
+    onItemClick: (com.example.palletify.data.Palette.Color) -> Unit
+) {
     val generatorUiState by generatorViewModel.uiState.collectAsStateWithLifecycle()
     val backgroundColor = Color(color.rgb.fraction.r, color.rgb.fraction.g, color.rgb.fraction.b)
     val luminosity =
@@ -218,10 +270,11 @@ fun ColorInPalette(generatorViewModel: GeneratorViewModel, color: com.example.pa
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
 
-    ) {
+        ) {
         Column(
-            Modifier
-                .padding(top = 16.dp, bottom = 16.dp),
+            modifier = Modifier
+                .padding(top = 16.dp, bottom = 16.dp)
+                .clickable { onItemClick(color) }
         ) {
             Text(
                 modifier = Modifier.padding(bottom = 4.dp),
