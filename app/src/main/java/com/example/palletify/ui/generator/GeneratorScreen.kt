@@ -60,12 +60,13 @@ fun GeneratorScreen(generatorViewModel: GeneratorViewModel = viewModel()) {
         mutableStateOf(0.dp)
     }
     val context = LocalContext.current
-    val palletViewModel1 = ViewModelProvider(context as ViewModelStoreOwner).get(PaletteViewModel::class.java)
+    val paletteViewModel =
+        ViewModelProvider(context as ViewModelStoreOwner)[PaletteViewModel::class.java]
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(top = 56.dp) // Adjust the value based on your design
+            .padding(top = 56.dp)
     ) {
         Scaffold(
             bottomBar = {
@@ -124,7 +125,7 @@ fun GeneratorScreen(generatorViewModel: GeneratorViewModel = viewModel()) {
                                 generatorViewModel.uiState.value.currentPalette.component4().hex.value
                             val color5 =
                                 generatorViewModel.uiState.value.currentPalette.component5().hex.value
-                            val pallet = Palette(
+                            val palette = Palette(
                                 0,
                                 numberOfColors,
                                 color1 = color1,
@@ -135,7 +136,7 @@ fun GeneratorScreen(generatorViewModel: GeneratorViewModel = viewModel()) {
                                 mode,
                                 favourite = false
                             )
-                            palletViewModel1.addPalette(pallet)
+                            paletteViewModel.addPalette(palette)
                         }
                         ) {
                             Text(
