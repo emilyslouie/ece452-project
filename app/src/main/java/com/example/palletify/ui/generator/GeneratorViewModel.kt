@@ -1,15 +1,20 @@
 package com.example.palletify.ui.generator
 
 import androidx.lifecycle.ViewModel
+import com.example.palletify.data.Palette
 import com.example.palletify.data.Palette.Color
-import com.example.palletify.data.Palette.Image
 import com.example.palletify.data.fetchPalette
 import com.example.palletify.data.fetchRandomHex
+import com.example.palletify.data.getRandomGenerationMode
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlin.concurrent.thread
+
+
+const val MAX_NUMBER_OF_COLORS = 6;
+const val MIN_NUMBER_OF_COLORS = 3;
 
 /**
  * ViewModel containing the app data and methods to process the data for the generator
@@ -21,20 +26,20 @@ class GeneratorViewModel : ViewModel() {
     val uiState: StateFlow<GeneratorUiState> = _uiState.asStateFlow()
 
     data class PaletteObj(
-        val numberOfColours: Int,
-        val colors: List<Color>,
+        var numberOfColours: Int,
+        val colors: MutableList<Color>,
         val mode: String,
-        val image: Image,
         // Locked colours are a member of PaletteObj so they will persist across undo/redo actions
         // We can change this later if it's undesirable behaviour
-        var lockedColours: MutableSet<Color>,
+        val lockedColours: MutableSet<Color>,
     )
 
     // Set of colors that have already been used as a seed in the generator
     private var usedSeedColors: MutableSet<String> = mutableSetOf()
 
     // Current palette
-    private var currentPalette: PaletteObj = PaletteObj(0, emptyList(), "", Image("", ""), mutableSetOf());
+    private var currentPalette: PaletteObj =
+        PaletteObj(0, mutableListOf(), "", mutableSetOf());
 
     // Stacks to keep palettes that can be undone and redone
     private var undoPalettes: ArrayDeque<PaletteObj> = ArrayDeque();
@@ -59,11 +64,19 @@ class GeneratorViewModel : ViewModel() {
     /*
     * Generates a random palette based off a random color
     */
-    private fun getRandomPalette(): PaletteObj {
+    private fun getRandomPalette(
+        mode: String = getRandomGenerationMode(),
+        numberOfColours: Int = 5
+    ): PaletteObj {
         val randomHexResponse = getRandomHex();
         usedSeedColors.add(randomHexResponse);
-        val response = fetchPalette(randomHexResponse);
-        val newPalette = PaletteObj(response.count, response.colors, response.mode, response.image, mutableSetOf());
+        val response = fetchPalette(randomHexResponse, mode, numberOfColours);
+        val newPalette = PaletteObj(
+            response.count,
+            response.colors,
+            response.mode,
+            mutableSetOf()
+        );
         return newPalette;
     }
 
@@ -73,7 +86,12 @@ class GeneratorViewModel : ViewModel() {
     private fun getPaletteForSeed(seedColor: Color): PaletteObj {
         val seedHex = seedColor.hex.clean
         val response = fetchPalette(seedHex);
-        val newPalette = PaletteObj(response.count, response.colors, response.mode, response.image, mutableSetOf());
+        val newPalette = PaletteObj(
+            response.count,
+            response.colors,
+            response.mode,
+            mutableSetOf()
+        );
 
         // TODO: thecolorapi does not use the seed color in the new palette, so locking is unintuitive
         // it uses the locked colour as a seed, but it may not be present in the generated palette
@@ -115,7 +133,6 @@ class GeneratorViewModel : ViewModel() {
                 numberOfColours = palette.numberOfColours,
                 currentPalette = palette.colors,
                 mode = palette.mode,
-                image = palette.image
             )
         }
         currentPalette = palette;
@@ -124,8 +141,11 @@ class GeneratorViewModel : ViewModel() {
     /*
     * Gets a random new palette, updates the current palette, and update undo/redo stacks
     */
-    fun getNewRandomPalette() {
-        val palette = getRandomPalette();
+    fun getNewRandomPalette(
+        mode: String = getRandomGenerationMode(),
+        numberOfColours: Int = 5
+    ) {
+        val palette = getRandomPalette(mode, numberOfColours);
         var currentCountInUndoStack = _uiState.value.palettesInUndoStack;
         if (currentPalette.numberOfColours > 0) {
             undoPalettes.add(currentPalette);
@@ -197,6 +217,55 @@ class GeneratorViewModel : ViewModel() {
                 palettesInRedoStack = currentState.palettesInRedoStack - 1,
                 lockedColors = newLockedColors
             );
+        }
+    }
+
+    /*
+    * Handle increase number of colors shown in the palette
+    */
+    fun handleIncreaseNumOfColors(seed: Palette.Color) {
+        if (currentPalette.numberOfColours < MAX_NUMBER_OF_COLORS) {
+            currentPalette.numberOfColours++;
+            val newColors = listOf<Color>(
+                Color(
+                    Palette.Hex("#FFFFFF", "FFFFFF"),
+                    Palette.Rgb(
+                        Palette.RgBFraction(1F, 1F, 1F),
+                        255F,
+                        255F,
+                        255F,
+                        "rgb(255, 255, 255)"
+                    ),
+                    Palette.Name("white"),
+                    Palette.Contrast("#000000")
+                )
+            );
+            val indexToAddNewColor = currentPalette.colors.indexOf(seed) + 1;
+            currentPalette.colors.add(indexToAddNewColor, newColors[0]);
+            val newPalette = currentPalette.colors.toMutableList();
+            _uiState.update { currentState ->
+                currentState.copy(
+                    numberOfColours = currentPalette.numberOfColours,
+                    currentPalette = newPalette
+                )
+            }
+        }
+    }
+
+    /*
+    * Handle decrease number of colors shown in the palette
+    */
+    fun handleDecreaseNumOfColors(color: Palette.Color) {
+        if (currentPalette.numberOfColours > MIN_NUMBER_OF_COLORS) {
+            currentPalette.numberOfColours--;
+            currentPalette.colors.remove(color);
+            val newPalette = currentPalette.colors.toMutableList();
+            _uiState.update { currentState ->
+                currentState.copy(
+                    numberOfColours = currentPalette.numberOfColours,
+                    currentPalette = newPalette
+                )
+            }
         }
     }
 

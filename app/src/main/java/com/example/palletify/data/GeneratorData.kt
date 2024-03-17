@@ -1,15 +1,13 @@
 package com.example.palletify.data
 
 
+import com.example.palletify.data.Palette.Color
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import kotlin.random.Random
-
-import com.example.palletify.data.Palette.Color;
-import com.example.palletify.data.Palette.Image;
 
 /**
  * Data that is needed for the generator
@@ -43,11 +41,15 @@ private val modeOptions = listOf(
     "quad"
 )
 
+fun getRandomGenerationMode(): String {
+    return modeOptions[Random.nextInt(modeOptions.size)];
+}
+
 private val jsonBuilder = Json { ignoreUnknownKeys = true }
 
 fun fetchPalette(
     seed: String,
-    mode: String = modeOptions[Random.nextInt(modeOptions.size)],
+    mode: String = getRandomGenerationMode(),
     numOfColours: Int = 5
 ): PaletteResponseBody {
     val client = OkHttpClient()
@@ -63,7 +65,6 @@ fun fetchPalette(
 data class PaletteResponseBody(
     val mode: String,
     val count: Int,
-    val colors: List<Color>,
-    val image: Image,
+    val colors: MutableList<Color>,
     val seed: Color,
 )
