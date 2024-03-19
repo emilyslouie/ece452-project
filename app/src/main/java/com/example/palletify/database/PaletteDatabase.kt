@@ -4,11 +4,13 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 
 @Database(
     entities = [Palette::class],
-    version = 1
+    version = 2
 )
+@TypeConverters(Converters::class)
 abstract class PaletteDatabase : RoomDatabase() {
     abstract fun paletteDao(): PaletteDao
 
@@ -27,6 +29,7 @@ abstract class PaletteDatabase : RoomDatabase() {
                     PaletteDatabase::class.java,
                     "palette_database"
                 )
+                    .fallbackToDestructiveMigration()
                     .build()
                 instance = newInstance
                 return newInstance

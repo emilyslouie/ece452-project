@@ -32,4 +32,9 @@ class PaletteViewModel(application: Application) : AndroidViewModel(application)
             repository.addPalette(palette)
         }
     }
+    fun deletePalette(palette: Palette) {
+        viewModelScope.launch {
+            repository.deletePalette(palette)
+        }
+    }
 }

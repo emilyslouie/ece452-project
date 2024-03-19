@@ -112,26 +112,18 @@ fun GeneratorScreen(generatorViewModel: GeneratorViewModel = viewModel()) {
                         }
                         // Save Button
                         Button(onClick = {
+                            val currentPalette = generatorViewModel.uiState.value.currentPalette
                             val numberOfColors = generatorViewModel.uiState.value.numberOfColours
                             val mode = generatorViewModel.uiState.value.mode
-                            val color1 =
-                                generatorViewModel.uiState.value.currentPalette.component1().hex.value
-                            val color2 =
-                                generatorViewModel.uiState.value.currentPalette.component2().hex.value
-                            val color3 =
-                                generatorViewModel.uiState.value.currentPalette.component3().hex.value
-                            val color4 =
-                                generatorViewModel.uiState.value.currentPalette.component4().hex.value
-                            val color5 =
-                                generatorViewModel.uiState.value.currentPalette.component5().hex.value
+                            val colorsList = mutableListOf<String>()
+                            for (i in 0 until numberOfColors) {
+                                val color = currentPalette[i].hex.value
+                                colorsList.add(color)
+                            }
                             val pallet = Palette(
                                 0,
                                 numberOfColors,
-                                color1 = color1,
-                                color2 = color2,
-                                color3 = color3,
-                                color4 = color4,
-                                color5 = color5,
+                                colorsList,
                                 mode,
                                 favourite = false
                             )
@@ -179,9 +171,14 @@ fun GeneratorScreen(generatorViewModel: GeneratorViewModel = viewModel()) {
 
 
 @Composable
-fun Palette(generatorViewModel: GeneratorViewModel, colors: List<com.example.palletify.data.Palette.Color>, numOfColors: Int, heightAvailable: Dp) {
-    val heightPerColor = heightAvailable / numOfColors;
-    // TODO: probably need to change this to be based on the number of colours so that we can add/subtract num of colours in a palette
+fun Palette(
+    generatorViewModel: GeneratorViewModel,
+    colors: List<com.example.palletify.data.Palette.Color>,
+    numOfColors: Int,
+    heightAvailable: Dp
+) {
+    val heightPerColor = heightAvailable / numOfColors
+
     colors.forEach { color ->
         ColorInPalette(generatorViewModel, color, heightPerColor)
     }
@@ -217,7 +214,7 @@ fun ColorInPalette(generatorViewModel: GeneratorViewModel, color: com.example.pa
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
 
-    ) {
+        ) {
         Column(
             Modifier
                 .padding(top = 16.dp, bottom = 16.dp),
