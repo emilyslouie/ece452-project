@@ -6,7 +6,12 @@ import kotlinx.coroutines.flow.Flow
 class PaletteInterface(private val paletteDao: PaletteDao) {
     val getAllPalettes: Flow<List<Palette>> = paletteDao.getAllPalettes()
 
-    suspend fun addPalette(palette: Palette){
+    suspend fun addPalette(palette: Palette) {
         paletteDao.insertPalette(palette)
     }
+
+    suspend fun deletePalette(palette: Palette) {
+        paletteDao.deletePalette(palette)
+    }
 }
+

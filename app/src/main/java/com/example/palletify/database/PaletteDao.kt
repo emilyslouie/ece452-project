@@ -11,9 +11,10 @@ import kotlinx.coroutines.flow.Flow
 interface PaletteDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insertPalette(palette: Palette)
+
     @Delete
-    fun deletePalette(palette: Palette)
-    // TODO: implement delete function
+    suspend fun deletePalette(palette: Palette)
+
     @Query("SELECT * FROM palette ORDER BY id ASC")
     fun getAllPalettes(): Flow<List<Palette>>
 }

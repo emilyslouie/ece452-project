@@ -152,26 +152,18 @@ fun GeneratorScreen(generatorViewModel: GeneratorViewModel = viewModel()) {
                         }
                         // Save Button
                         Button(onClick = {
+                            val currentPalette = generatorViewModel.uiState.value.currentPalette
                             val numberOfColors = generatorViewModel.uiState.value.numberOfColours
                             val mode = generatorViewModel.uiState.value.mode
-                            val color1 =
-                                generatorViewModel.uiState.value.currentPalette.component1().hex.value
-                            val color2 =
-                                generatorViewModel.uiState.value.currentPalette.component2().hex.value
-                            val color3 =
-                                generatorViewModel.uiState.value.currentPalette.component3().hex.value
-                            val color4 =
-                                generatorViewModel.uiState.value.currentPalette.component4().hex.value
-                            val color5 =
-                                generatorViewModel.uiState.value.currentPalette.component5().hex.value
+                            val colorsList = mutableListOf<String>()
+                            for (i in 0 until numberOfColors) {
+                                val color = currentPalette[i].hex.value
+                                colorsList.add(color)
+                            }
                             val palette = Palette(
                                 0,
                                 numberOfColors,
-                                color1 = color1,
-                                color2 = color2,
-                                color3 = color3,
-                                color4 = color4,
-                                color5 = color5,
+                                colorsList,
                                 mode,
                                 favourite = false
                             )
