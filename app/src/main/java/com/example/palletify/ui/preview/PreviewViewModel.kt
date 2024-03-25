@@ -38,10 +38,6 @@ class PreviewViewModel: ViewModel() {
         }
     }
 
-    fun hexToComposeColor(hex: Palette.Hex): Color {
-        return Color(hex.value.toColorInt());
-    }
-
     fun setCurrentColor(color: Palette.Color) {
         _uiState.update { currentState ->
             currentState.copy(
