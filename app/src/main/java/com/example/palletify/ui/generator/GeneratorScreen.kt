@@ -46,6 +46,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.palletify.ColorUtils.hexToComposeColor
 import com.example.palletify.database.Palette
 import com.example.palletify.database.PaletteViewModel
 import com.example.palletify.ui.components.BottomSheet
@@ -132,16 +133,7 @@ fun GeneratorScreen(generatorViewModel: GeneratorViewModel = viewModel()) {
                             }
                         }
                         Button(onClick = {
-                            if (generatorUiState.lockedColors.size == 1) {
-                                // TODO: Change undo/redo logic to update lockedColors for current palette
-                                val seedColor = generatorUiState.lockedColors.iterator().next();
-                                thread { generatorViewModel.getNewPaletteWithSeed(seedColor) }
-                            } else if (generatorUiState.lockedColors.size > 1) {
-                                // TODO: Send multiple requests for each seed, then combine results into one palette
-                            } else {
-                                // If no locked colours, generate palette with random seed
-                                thread { generatorViewModel.getNewRandomPalette(numberOfColours = generatorUiState.numberOfColours) }
-                            }
+                            thread { generatorViewModel.getNewPalette() }
                         }) {
                             Text(
                                 modifier = Modifier.padding(end = 4.dp),
@@ -164,7 +156,7 @@ fun GeneratorScreen(generatorViewModel: GeneratorViewModel = viewModel()) {
                                 0,
                                 numberOfColors,
                                 colorsList,
-                                mode,
+                                mode.mode,
                                 favourite = false
                             )
                             paletteViewModel.addPalette(palette)
@@ -197,11 +189,10 @@ fun GeneratorScreen(generatorViewModel: GeneratorViewModel = viewModel()) {
                     generatorViewModel = generatorViewModel,
                     colors = generatorUiState.currentPalette,
                     numOfColors = generatorUiState.numberOfColours,
-                    heightAvailable = columnHeightDp,
-                    onItemClick = { selectedColor ->
-                        activeColor = selectedColor
-                    }
-                )
+                    heightAvailable = columnHeightDp
+                ) { selectedColor ->
+                    activeColor = selectedColor
+                }
             }
         }
     }
@@ -211,7 +202,7 @@ fun GeneratorScreen(generatorViewModel: GeneratorViewModel = viewModel()) {
 @Composable
 fun Palette(
     generatorViewModel: GeneratorViewModel,
-    colors: List<com.example.palletify.data.Palette.Color>,
+    colors: MutableList<com.example.palletify.data.Palette.Color>,
     numOfColors: Int,
     heightAvailable: Dp,
     onItemClick: (com.example.palletify.data.Palette.Color) -> Unit
@@ -229,9 +220,12 @@ fun Palette(
 
 // Formula to calculate the luminosity of the colour was referenced from:
 // https://stackoverflow.com/questions/3942878/how-to-decide-font-color-in-white-or-black-depending-on-background-color
-fun calculateLuminosity(red: Float, green: Float, blue: Float): Double {
-    return (0.2126 * calculateRgbFraction(red)) + (0.7152 * calculateRgbFraction(green)) + (0.0722 * calculateRgbFraction(
-        blue
+fun calculateLuminosity(red: Int, green: Int, blue: Int): Double {
+    val r = red / 255f;
+    val g = green / 255f;
+    val b = blue / 255f;
+    return (0.2126 * calculateRgbFraction(r)) + (0.7152 * calculateRgbFraction(g)) + (0.0722 * calculateRgbFraction(
+        b
     ))
 }
 
@@ -250,14 +244,13 @@ fun ColorInPalette(
     onItemClick: (com.example.palletify.data.Palette.Color) -> Unit
 ) {
     val generatorUiState by generatorViewModel.uiState.collectAsStateWithLifecycle()
-    val backgroundColor = Color(color.rgb.fraction.r, color.rgb.fraction.g, color.rgb.fraction.b)
     val luminosity =
-        calculateLuminosity(color.rgb.fraction.r, color.rgb.fraction.g, color.rgb.fraction.b)
+        calculateLuminosity(color.rgb.r, color.rgb.g, color.rgb.b)
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(heightPerColor)
-            .background(backgroundColor)
+            .background(hexToComposeColor(color.hex))
             .padding(16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
@@ -274,11 +267,12 @@ fun ColorInPalette(
                 color = if (luminosity >= 0.179) Color.Black else Color.White,
                 style = typography.headlineSmall
             )
-            Text(
-                text = color.name.value,
-                color = if (luminosity >= 0.179) Color(35, 35, 35) else Color(230, 230, 230),
-                style = typography.labelMedium
-            )
+            // TODO: put back name once we get name from Color API
+//            Text(
+//                text = color.name.value,
+//                color = if (luminosity >= 0.179) Color(35, 35, 35) else Color(230, 230, 230),
+//                style = typography.labelMedium
+//            )
         }
 
         if (!generatorUiState.lockedColors.contains(color)) {

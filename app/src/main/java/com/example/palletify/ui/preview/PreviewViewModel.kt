@@ -1,10 +1,8 @@
 package com.example.palletify.ui.preview
 
-import androidx.compose.ui.graphics.Color
-import androidx.core.graphics.toColorInt
 import androidx.lifecycle.ViewModel
 import com.example.palletify.data.Palette
-import com.example.palletify.data.fetchPalette
+import com.example.palletify.data.fetchPaletteFromColorApi
 import com.example.palletify.data.fetchRandomHex
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,7 +13,7 @@ import kotlin.concurrent.thread
 /**
  * ViewModel containing the app data and methods to process the data for the preview
  */
-class PreviewViewModel: ViewModel() {
+class PreviewViewModel : ViewModel() {
 
     // Generator UI state
     private val _uiState = MutableStateFlow(PreviewUiState())
@@ -27,19 +25,15 @@ class PreviewViewModel: ViewModel() {
         }
     }
 
-    fun setPreviewTestData() {
+    private fun setPreviewTestData() {
         val randomHexResponse = fetchRandomHex();
-        val palette = fetchPalette(randomHexResponse);
+        val palette = fetchPaletteFromColorApi(randomHexResponse);
         _uiState.update { currentState ->
             currentState.copy(
-                colors = palette.colors,
-                currentColor = palette.colors[0]
+                colors = palette,
+                currentColor = palette[0]
             )
         }
-    }
-
-    fun hexToComposeColor(hex: Palette.Hex): Color {
-        return Color(hex.value.toColorInt());
     }
 
     fun setCurrentColor(color: Palette.Color) {
