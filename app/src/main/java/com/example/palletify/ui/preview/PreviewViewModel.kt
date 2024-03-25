@@ -30,8 +30,8 @@ class PreviewViewModel : ViewModel() {
         val palette = fetchPaletteFromColorApi(randomHexResponse);
         _uiState.update { currentState ->
             currentState.copy(
-                colors = palette.colors,
-                currentColor = palette.colors[0]
+                colors = palette,
+                currentColor = palette[0]
             )
         }
     }

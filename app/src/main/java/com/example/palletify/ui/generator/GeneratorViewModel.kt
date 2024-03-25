@@ -1,8 +1,9 @@
 package com.example.palletify.ui.generator
 
 import androidx.lifecycle.ViewModel
+import com.example.palletify.ColorUtils.hexToRgb
+import com.example.palletify.data.GenerationMode
 import com.example.palletify.data.Palette
-import com.example.palletify.data.Palette.Color
 import com.example.palletify.data.fetchPalette
 import com.example.palletify.data.fetchRandomHex
 import com.example.palletify.data.getRandomGenerationMode
@@ -27,11 +28,11 @@ class GeneratorViewModel : ViewModel() {
 
     data class PaletteObj(
         var numberOfColours: Int,
-        val colors: MutableList<Color>,
-        val mode: String,
+        val colors: MutableList<Palette.Color>,
+        val mode: GenerationMode,
         // Locked colours are a member of PaletteObj so they will persist across undo/redo actions
         // We can change this later if it's undesirable behaviour
-        val lockedColours: MutableSet<Color>,
+        val lockedColours: MutableSet<Palette.Color>,
     )
 
     // Set of colors that have already been used as a seed in the generator
@@ -39,7 +40,7 @@ class GeneratorViewModel : ViewModel() {
 
     // Current palette
     private var currentPalette: PaletteObj =
-        PaletteObj(0, mutableListOf(), "", mutableSetOf());
+        PaletteObj(0, mutableListOf(), GenerationMode.ANY, mutableSetOf());
 
     // Stacks to keep palettes that can be undone and redone
     private var undoPalettes: ArrayDeque<PaletteObj> = ArrayDeque();
@@ -58,58 +59,30 @@ class GeneratorViewModel : ViewModel() {
         usedSeedColors.clear();
         undoPalettes.clear();
         redoPalettes.clear();
-        getNewRandomPalette();
+        getNewPalette();
     }
 
-    /*
-    * Generates a random palette based off a random color
-    */
-    private fun getRandomPalette(
-        mode: String = getRandomGenerationMode(),
-        numberOfColours: Int = 5
-    ): PaletteObj {
-        val randomHexResponse = getRandomHex();
-        usedSeedColors.add(randomHexResponse);
-        val response = fetchPalette(randomHexResponse, mode, numberOfColours);
-        val newPalette = PaletteObj(
-            response.count,
-            response.colors,
-            response.mode,
-            mutableSetOf()
-        );
-        return newPalette;
-    }
+    fun getPalette(): PaletteObj {
+        val lockedColors = uiState.value.lockedColors.toMutableSet();
+        val count = uiState.value.numberOfColours;
+        var mode = uiState.value.mode;
 
-    /*
-    * Generates a  palette based off a given seed
-    */
-    private fun getPaletteForSeed(seedColor: Color): PaletteObj {
-        val seedHex = seedColor.hex.clean
-        val response = fetchPalette(seedHex);
-        val newPalette = PaletteObj(
-            response.count,
-            response.colors,
-            response.mode,
-            mutableSetOf()
-        );
-
-        // TODO: thecolorapi does not use the seed color in the new palette, so locking is unintuitive
-        // it uses the locked colour as a seed, but it may not be present in the generated palette
-        if (newPalette.colors.contains(seedColor)) {
-            // Re-lock seed color (if it exists in palette) for consistency after generation
-            currentPalette.lockedColours.add(seedColor)
-            // Clone set to assign to ui state
-            val newLockedColors = currentPalette.lockedColours.toMutableSet()
-
-            _uiState.update { currentState ->
-                currentState.copy(
-                    // If we set lockedColors = currentPalette.lockedColours, then even though the contents
-                    // of the set change, the ui state sees same reference address, so won't recompose
-                    lockedColors = newLockedColors
-                );
-            }
+        // If the mode ANY, get a random mode
+        if (mode == GenerationMode.ANY) {
+            mode = getRandomGenerationMode();
         }
-        return newPalette;
+
+        val colors = fetchPalette(
+            // if there are no locked colors, then get a random color as the seed
+            if (lockedColors.isEmpty()) mutableSetOf(getRandomColor()) else lockedColors,
+            count,
+            mode
+        );
+
+        // For now, reset the mode to ANY, change this once we have a picker
+        mode = GenerationMode.ANY;
+
+        return PaletteObj(count, colors, mode, lockedColors);
     }
 
     /*
@@ -125,48 +98,36 @@ class GeneratorViewModel : ViewModel() {
     }
 
     /*
+    * Generates a random Color object
+    */
+    private fun getRandomColor(): Palette.Color {
+        val randomHex = getRandomHex();
+        val rgbValue = hexToRgb(randomHex);
+        val rgb = Palette.Rgb(rgbValue[0], rgbValue[1], rgbValue[2]);
+        val hex = Palette.Hex("#$randomHex", randomHex);
+        return Palette.Color(hex, rgb);
+    }
+
+    /*
     * Updates the current palette in the ViewModel and UiState
     */
     private fun setCurrentPalette(palette: PaletteObj) {
         _uiState.update { currentState ->
             currentState.copy(
                 numberOfColours = palette.numberOfColours,
-                currentPalette = palette.colors,
+                currentPalette = palette.colors.toMutableList(),
                 mode = palette.mode,
+                lockedColors = palette.lockedColours.toMutableSet(),
             )
         }
         currentPalette = palette;
     }
 
     /*
-    * Gets a random new palette, updates the current palette, and update undo/redo stacks
+    * Gets a palette and updates the palette in ViewModel and UiState
     */
-    fun getNewRandomPalette(
-        mode: String = getRandomGenerationMode(),
-        numberOfColours: Int = 5
-    ) {
-        val palette = getRandomPalette(mode, numberOfColours);
-        var currentCountInUndoStack = _uiState.value.palettesInUndoStack;
-        if (currentPalette.numberOfColours > 0) {
-            undoPalettes.add(currentPalette);
-            currentCountInUndoStack++;
-        }
-        setCurrentPalette(palette);
-        // The redo stack is cleared if a new palette is generated
-        redoPalettes.clear();
-        _uiState.update { currentState ->
-            currentState.copy(
-                palettesInUndoStack = currentCountInUndoStack,
-                palettesInRedoStack = 0
-            );
-        }
-    }
-
-    /*
-    * Gets a new palette using seed colour, updates the current palette, and update undo/redo stacks
-    */
-    fun getNewPaletteWithSeed(seedColor: Color) {
-        val palette = getPaletteForSeed(seedColor);
+    fun getNewPalette() {
+        val palette = getPalette();
         var currentCountInUndoStack = _uiState.value.palettesInUndoStack;
         if (currentPalette.numberOfColours > 0) {
             undoPalettes.add(currentPalette);
@@ -226,18 +187,14 @@ class GeneratorViewModel : ViewModel() {
     fun handleIncreaseNumOfColors(seed: Palette.Color) {
         if (currentPalette.numberOfColours < MAX_NUMBER_OF_COLORS) {
             currentPalette.numberOfColours++;
-            val newColors = listOf<Color>(
-                Color(
+            val newColors = listOf<Palette.Color>(
+                Palette.Color(
                     Palette.Hex("#FFFFFF", "FFFFFF"),
                     Palette.Rgb(
-                        Palette.RgBFraction(1F, 1F, 1F),
-                        255F,
-                        255F,
-                        255F,
-                        "rgb(255, 255, 255)"
-                    ),
-                    Palette.Name("white"),
-                    Palette.Contrast("#000000")
+                        255,
+                        255,
+                        255,
+                    )
                 )
             );
             val indexToAddNewColor = currentPalette.colors.indexOf(seed) + 1;
@@ -272,7 +229,7 @@ class GeneratorViewModel : ViewModel() {
     /*
     * Add a colour to its palette's set of lockedColours
     */
-    fun handleLockForColor(color: Color) {
+    fun handleLockForColor(color: Palette.Color) {
         // Update view model
         currentPalette.lockedColours.add(color)
         // Clone set to assign to ui state
@@ -290,7 +247,7 @@ class GeneratorViewModel : ViewModel() {
     /*
     * Remove a colour from its palette's set of lockedColours
     */
-    fun handleUnlockForColor(color: Color) {
+    fun handleUnlockForColor(color: Palette.Color) {
         // Update view model
         currentPalette.lockedColours.remove(color)
         // Clone set to assign to ui state

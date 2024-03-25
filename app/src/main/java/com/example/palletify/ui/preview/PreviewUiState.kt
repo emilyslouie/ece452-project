@@ -1,16 +1,15 @@
 package com.example.palletify.ui.preview
 
-import com.example.palletify.data.Palette.Color
+import com.example.palletify.data.Palette
 import com.example.palletify.data.Palette.Hex
-import com.example.palletify.data.Palette.Rgb
-import com.example.palletify.data.Palette.RgBFraction
-import com.example.palletify.data.Palette.Name
-import com.example.palletify.data.Palette.Contrast
 
 /**
  * Data class that represents the preview's UI state
  */
 data class PreviewUiState(
-    val colors: List<Color> = emptyList(),
-    val currentColor : Color = Color(Hex("#FFFFFF", "FFFFFF"), Rgb(RgBFraction(1F, 1F, 1F), 255F, 255F, 255F, "rgb(255, 255, 255)"), Name("white"), Contrast("#000000"))
+    val colors: MutableList<Palette.Color> = mutableListOf(),
+    val currentColor: Palette.Color = Palette.Color(
+        Hex("#FFFFFF", "FFFFFF"),
+        Palette.Rgb(255, 255, 255)
+    )
 )

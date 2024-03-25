@@ -132,7 +132,7 @@ fun GenerateWithImageScreen(
                         0,
                         numberOfColors,
                         colorsList,
-                        mode,
+                        mode.mode,
                         favourite = false
                     )
                     paletteViewModel.addPalette(palette)
