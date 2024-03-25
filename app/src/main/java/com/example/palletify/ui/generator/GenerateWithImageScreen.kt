@@ -21,7 +21,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,10 +35,14 @@ import com.example.palletify.database.PaletteViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GenerateWithImageScreen(uploadedImageUri: Uri?, generatorViewModel: GeneratorViewModel = viewModel()) {
+fun GenerateWithImageScreen(
+    uploadedImageUri: Uri?,
+    generatorViewModel: GeneratorViewModel = viewModel()
+) {
     val generatorUiState by generatorViewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    val palletViewModel1 = ViewModelProvider(context as ViewModelStoreOwner).get(PaletteViewModel::class.java)
+    val paletteViewModel =
+        ViewModelProvider(context as ViewModelStoreOwner).get(PaletteViewModel::class.java)
 
     Scaffold(
         topBar = {
@@ -70,7 +73,7 @@ fun GenerateWithImageScreen(uploadedImageUri: Uri?, generatorViewModel: Generato
                     modifier = Modifier
                         .padding(top = 8.dp)
                         .heightIn(min = 55.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFfff7b2),),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFfff7b2)),
                     onClick = { /* No action is triggered */ }
                 ) {
                     Text("")
@@ -88,7 +91,7 @@ fun GenerateWithImageScreen(uploadedImageUri: Uri?, generatorViewModel: Generato
                     modifier = Modifier
                         .padding(top = 8.dp)
                         .heightIn(min = 55.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF49cc6e),),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF49cc6e)),
                     onClick = { /* No action is triggered */ }
                 ) {
                     Text("")
@@ -97,7 +100,7 @@ fun GenerateWithImageScreen(uploadedImageUri: Uri?, generatorViewModel: Generato
                     modifier = Modifier
                         .padding(top = 8.dp)
                         .heightIn(min = 55.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF9b7367),),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF9b7367)),
                     onClick = { /* No action is triggered */ }
                 ) {
                     Text("")
@@ -106,7 +109,7 @@ fun GenerateWithImageScreen(uploadedImageUri: Uri?, generatorViewModel: Generato
                     modifier = Modifier
                         .padding(top = 8.dp)
                         .heightIn(min = 55.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF775798),),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF775798)),
                     onClick = { /* No action is triggered */ }
                 ) {
                     Text("")
@@ -125,14 +128,14 @@ fun GenerateWithImageScreen(uploadedImageUri: Uri?, generatorViewModel: Generato
                         val color = currentPalette[i].hex.value
                         colorsList.add(color)
                     }
-                    val pallet = com.example.palletify.database.Palette(
+                    val palette = com.example.palletify.database.Palette(
                         0,
                         numberOfColors,
                         colorsList,
                         mode,
                         favourite = false
                     )
-                    palletViewModel1.addPalette(pallet)
+                    paletteViewModel.addPalette(palette)
                 }
             ) {
                 Text(

@@ -47,7 +47,7 @@ fun getRandomGenerationMode(): String {
 
 private val jsonBuilder = Json { ignoreUnknownKeys = true }
 
-fun fetchPalette(
+fun fetchPaletteFromColorApi(
     seed: String,
     mode: String = getRandomGenerationMode(),
     numOfColours: Int = 5
