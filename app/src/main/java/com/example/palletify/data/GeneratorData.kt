@@ -16,22 +16,39 @@ import kotlin.random.Random
 /**
  * Data that is needed for the generator
  */
-fun fetchRandomHex(): String {
+fun fetchRandomColors(count: Int = 1): MutableList<Palette.Color> {
     val client = OkHttpClient()
     val request = Request(
-        url = "https://x-colors.yurace.pro/api/random".toHttpUrl()
+        url = "https://x-colors.yurace.pro/api/random?number=$count".toHttpUrl()
     )
     val response = client.newCall(request).execute()
-    val json = response.body.string()
-    val responseBody = jsonBuilder.decodeFromString<RandomColourResponseBody>(json)
-    return responseBody.hex.substring(1)
+    var json = response.body.string()
+    if (count == 1) {
+        json = "[$json]";
+    }
+    val responseBody = jsonBuilder.decodeFromString<List<RandomColor>>(json)
+    val result = mutableListOf<Palette.Color>()
+    for (color in responseBody) {
+        val hex = Palette.Hex(color.hex, color.hex.substring(1));
+        val rgbFromResponse = color.rgb.split(',')
+        val r = rgbFromResponse[0].substring(4).trim().toInt()
+        val g = rgbFromResponse[1].trim().toInt()
+        val b = rgbFromResponse[2].substringBefore(')').trim().toInt();
+        val rgb = Palette.Rgb(r, g, b);
+        result.add(Palette.Color(hex, rgb));
+    }
+    return result;
 }
 
 @Serializable
 data class RandomColourResponseBody(
+    val colors: List<RandomColor>,
+)
+
+@Serializable
+data class RandomColor(
     val hex: String,
     val rgb: String,
-    val hsl: String,
 )
 
 
@@ -42,6 +59,7 @@ enum class GenerationMode(val mode: String) {
     TRIAD("triad"),
     QUAD("quad"),
     GRADIENT("gradient"),
+    RANDOM("random"),
     ANY("any")
 }
 
@@ -96,6 +114,7 @@ fun fetchPalette(
 ): MutableList<Palette.Color> {
     val result = when (generationMode) {
         GenerationMode.COMPLEMENT -> generateComplementaryPalette(seeds, count);
+        GenerationMode.RANDOM -> generateRandomPalette(seeds, count);
         GenerationMode.ANALOGIC -> generateAnalogicPalette(seeds, count);
         // TODO: Implement the remaining color generation algorithms
         else -> {
@@ -176,5 +195,14 @@ fun generateAnalogicPalette(
         // TODO: use the Color Api to get the name of the color and add it back to the Color object
         result.add(Palette.Color(hex, rgb));
     }
+    return result;
+}
+
+fun generateRandomPalette(
+    seeds: MutableSet<Palette.Color>,
+    count: Int
+): MutableList<Palette.Color> {
+    val result: MutableList<Palette.Color> = seeds.toMutableList();
+    result.addAll(fetchRandomColors(count - seeds.size));
     return result;
 }

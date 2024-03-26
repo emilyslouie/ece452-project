@@ -1,11 +1,10 @@
 package com.example.palletify.ui.generator
 
 import androidx.lifecycle.ViewModel
-import com.example.palletify.ColorUtils.hexToRgb
 import com.example.palletify.data.GenerationMode
 import com.example.palletify.data.Palette
 import com.example.palletify.data.fetchPalette
-import com.example.palletify.data.fetchRandomHex
+import com.example.palletify.data.fetchRandomColors
 import com.example.palletify.data.getRandomGenerationMode
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -72,9 +71,16 @@ class GeneratorViewModel : ViewModel() {
             mode = getRandomGenerationMode();
         }
 
+        val seeds = lockedColors.toMutableSet();
+
+        // if there are no locked colors, then get a random color as the seed
+        if (lockedColors.isEmpty()) {
+            val randomColor = getRandomColor();
+            seeds.add(randomColor);
+            usedSeedColors.add(randomColor.hex.clean);
+        }
         val colors = fetchPalette(
-            // if there are no locked colors, then get a random color as the seed
-            if (lockedColors.isEmpty()) mutableSetOf(getRandomColor()) else lockedColors,
+            seeds,
             count,
             mode
         );
@@ -88,24 +94,13 @@ class GeneratorViewModel : ViewModel() {
     /*
     * Generates a random hex code
     */
-    private fun getRandomHex(): String {
-        val response: String = fetchRandomHex();
-        return if (usedSeedColors.contains(response)) {
-            getRandomHex();
-        } else {
-            return response;
-        }
-    }
-
-    /*
-    * Generates a random Color object
-    */
     private fun getRandomColor(): Palette.Color {
-        val randomHex = getRandomHex();
-        val rgbValue = hexToRgb(randomHex);
-        val rgb = Palette.Rgb(rgbValue[0], rgbValue[1], rgbValue[2]);
-        val hex = Palette.Hex("#$randomHex", randomHex);
-        return Palette.Color(hex, rgb);
+        val response = fetchRandomColors();
+        return if (usedSeedColors.contains(response[0].hex.clean)) {
+            getRandomColor();
+        } else {
+            return response[0];
+        }
     }
 
     /*
