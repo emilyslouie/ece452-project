@@ -3,7 +3,7 @@ package com.example.palletify.ui.preview
 import androidx.lifecycle.ViewModel
 import com.example.palletify.data.Palette
 import com.example.palletify.data.fetchPaletteFromColorApi
-import com.example.palletify.data.fetchRandomHex
+import com.example.palletify.data.fetchRandomColors
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,8 +26,11 @@ class PreviewViewModel : ViewModel() {
     }
 
     private fun setPreviewTestData() {
-        val randomHexResponse = fetchRandomHex();
-        val palette = fetchPaletteFromColorApi(randomHexResponse);
+        val randomHexResponse = fetchRandomColors();
+        val palette = fetchPaletteFromColorApi(
+            randomHexResponse[0].hex
+                .clean
+        );
         _uiState.update { currentState ->
             currentState.copy(
                 colors = palette,
