@@ -1,6 +1,7 @@
 package com.example.palletify.data
 
 
+import com.example.palletify.ColorUtils.getAnalogousHue
 import com.example.palletify.ColorUtils.getDarkerAndLighter
 import com.example.palletify.ColorUtils.hslToRgb
 import com.example.palletify.ColorUtils.rgbToHex
@@ -114,6 +115,7 @@ fun fetchPalette(
     val result = when (generationMode) {
         GenerationMode.COMPLEMENT -> generateComplementaryPalette(seeds, count);
         GenerationMode.RANDOM -> generateRandomPalette(seeds, count);
+        GenerationMode.ANALOGIC -> generateAnalogicPalette(seeds, count);
         // TODO: Implement the remaining color generation algorithms
         else -> {
             // If the generation mode is not specified, for now, get a random palette from the Color API
@@ -140,11 +142,45 @@ fun generateComplementaryPalette(
     var currentCount = rgbColors.size;
     while (currentCount < count) {
         val hsl = rgbToHsl(rgbColors[hslSeed]);
-        // TODO: need to create a random offset so that if the same seed is passed in again, we do not create the same palette
-        val newLightnessValues = getDarkerAndLighter(hsl[2]);
+        val newLightnessValues = getDarkerAndLighter(hsl[2], Random.nextDouble(0.05, 0.15));
         val firstNewHsl = hslToRgb(arrayOf(hsl[0], hsl[1], newLightnessValues[0]));
         rgbColors.add(firstNewHsl);
         val secondNewHsl = hslToRgb(arrayOf(hsl[0], hsl[1], newLightnessValues[1]));
+        rgbColors.add(secondNewHsl);
+        hslSeed++;
+        currentCount += 2;
+    }
+
+    val result: MutableList<Palette.Color> = mutableListOf();
+    for (color in 0..<count) {
+        val currColor = rgbColors[color];
+        val rgb = Palette.Rgb(currColor[0], currColor[1], currColor[2]);
+        val hexValue = rgbToHex(currColor);
+        val hex = Palette.Hex("#$hexValue", hexValue);
+        // TODO: use the Color Api to get the name of the color and add it back to the Color object
+        result.add(Palette.Color(hex, rgb));
+    }
+    return result;
+}
+
+fun generateAnalogicPalette(
+    seeds: MutableSet<Palette.Color>,
+    count: Int
+): MutableList<Palette.Color> {
+    val rgbColors: MutableList<Array<Int>> = mutableListOf();
+    for (color in seeds) {
+        val rgb = color.rgb;
+        rgbColors.add(arrayOf(rgb.r, rgb.g, rgb.b))
+    }
+
+    var hslSeed = 0;
+    var currentCount = rgbColors.size;
+    while (currentCount < count) {
+        val hsl = rgbToHsl(rgbColors[hslSeed]);
+        val newHueValues = getAnalogousHue(hsl[0], Random.nextDouble(0.05, 0.15));
+        val firstNewHsl = hslToRgb(arrayOf(newHueValues[0], hsl[1], hsl[2]));
+        rgbColors.add(firstNewHsl);
+        val secondNewHsl = hslToRgb(arrayOf(newHueValues[1], hsl[1], hsl[2]));
         rgbColors.add(secondNewHsl);
         hslSeed++;
         currentCount += 2;

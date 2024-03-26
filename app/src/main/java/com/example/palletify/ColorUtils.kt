@@ -135,20 +135,35 @@ object ColorUtils {
     }
 
     // Used to get 2 lightness values that are significantly different from the seed lightness
-    fun getDarkerAndLighter(lightness: Double): Array<Double> {
+    fun getDarkerAndLighter(lightness: Double, offset: Double): Array<Double> {
         val result = arrayOf(lightness, lightness);
 
         // if it is really dark, then we want to choose two lighter values
-        if (1.0 - lightness <= 0.1) {
-            result[0] = lightness / 3.0; // 1/3 of the original lightness
-            result[1] = (lightness / 3.0) * 2.0; // 2/3 of the original lightness
-        } else if (lightness <= 0.1) { // if it is really light, then we want to choose two darker values
+        if (1.0 - lightness <= 0.2) {
+            result[0] = (lightness / 3.0) + offset; // 1/3 of the original lightness
+            result[1] = ((lightness / 3.0) * 2.0) + offset; // 2/3 of the original lightness
+        } else if (lightness <= 0.2) { // if it is really light, then we want to choose two darker values
             val difference = 1.0 - lightness;
-            result[0] = (difference / 3.0) + lightness;
-            result[1] = ((difference / 3.0) * 2.0) + lightness;
+            result[0] = (difference / 3.0) + lightness + offset;
+            result[1] = ((difference / 3.0) * 2.0) + lightness + offset;
         } else { // otherwise get one darker and one lighter
-            result[0] = ((1.0 - lightness) / 2.0) + lightness;
-            result[1] = (lightness / 2.0);
+            result[0] = if (lightness >= 0.5) lightness - (2.0 * offset) else lightness + offset;
+            result[1] = if (lightness <= 0.5) lightness + (2.0 * offset) else lightness - offset;
+        }
+        return result;
+    }
+
+    fun getAnalogousHue(hue: Double, offset: Double): Array<Double> {
+        val result = arrayOf(hue, hue);
+        if (1.0 - hue <= 0.1) {
+            result[0] = hue - offset;
+            result[1] = hue - (2.0 * offset);
+        } else if (hue <= 0.1) {
+            result[0] = hue + offset;
+            result[1] = hue + (2.0 * offset);
+        } else {
+            result[0] = hue + offset;
+            result[1] = hue - offset;
         }
         return result;
     }
