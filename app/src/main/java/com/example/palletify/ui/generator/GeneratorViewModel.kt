@@ -64,7 +64,7 @@ class GeneratorViewModel : ViewModel() {
     fun getPalette(): PaletteObj {
         val lockedColors = uiState.value.lockedColors.toMutableSet();
         val count = uiState.value.numberOfColours;
-        var mode = GenerationMode.RANDOM;
+        var mode = uiState.value.mode;
 
         // If the mode ANY, get a random mode
         if (mode == GenerationMode.ANY) {
