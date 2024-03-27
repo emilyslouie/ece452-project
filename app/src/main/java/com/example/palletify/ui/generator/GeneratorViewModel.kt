@@ -257,4 +257,15 @@ class GeneratorViewModel : ViewModel() {
             );
         }
     }
+
+    /*
+    * Update the generation mode
+    */
+    fun handleNewGenerationMode(newMode: GenerationMode) {
+        _uiState.update { currentState ->
+            currentState.copy(
+                mode = newMode
+            );
+        }
+    }
 }
