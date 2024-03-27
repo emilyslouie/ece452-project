@@ -8,6 +8,7 @@ class Palette {
     data class Color(
         val hex: Hex,
         val rgb: Rgb,
+        val name: Name,
     ) {
         // Override default equals operator since it uses referential equality by default (compare addresses)
         // We want structural equality (compare values of all members in struct)
@@ -16,7 +17,7 @@ class Palette {
                 is Color -> {
                     this.hex == other.hex &&
                             this.rgb == other.rgb
-//                            && this.name == other.name
+                            && this.name == other.name
                 }
 
                 else -> false
@@ -28,7 +29,7 @@ class Palette {
         override fun hashCode(): Int {
             var result = hex.hashCode()
             result = 31 * result + rgb.hashCode()
-//            result = 31 * result + name.hashCode()
+            result = 31 * result + name.hashCode()
             return result
         }
     }
