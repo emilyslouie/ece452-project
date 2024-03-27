@@ -23,3 +23,4 @@
 | 03/24/2024 |      |          | 4   |              |         |        | Add complementary colour generation mode                         |
 | 03/25/2024 |      |          | 3   |              |         |        | Add analogous colour generation mode                             |
 | 03/26/2024 |      |          | 2   |              |         |        | Add random colour generator mode                                 |
+| 03/27/2024 |      |          | 2   |              |         |        | Fetch colour name and display it in generator                    |
