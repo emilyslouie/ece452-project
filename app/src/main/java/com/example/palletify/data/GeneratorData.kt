@@ -14,7 +14,7 @@ import okhttp3.Request
 import kotlin.random.Random
 
 /**
- * Data that is needed for the generator
+ * Get random colors for a specified number
  */
 fun fetchRandomColors(count: Int = 1): MutableList<Palette.Color> {
     val client = OkHttpClient()
@@ -35,20 +35,38 @@ fun fetchRandomColors(count: Int = 1): MutableList<Palette.Color> {
         val g = rgbFromResponse[1].trim().toInt()
         val b = rgbFromResponse[2].substringBefore(')').trim().toInt();
         val rgb = Palette.Rgb(r, g, b);
-        result.add(Palette.Color(hex, rgb));
+        val name = fetchColorName(hex);
+
+        result.add(Palette.Color(hex, rgb, name));
     }
     return result;
 }
 
 @Serializable
-data class RandomColourResponseBody(
-    val colors: List<RandomColor>,
-)
-
-@Serializable
 data class RandomColor(
     val hex: String,
     val rgb: String,
+)
+
+fun fetchColorName(color: Palette.Hex): Palette.Name {
+    val client = OkHttpClient()
+    val request = Request(
+        url = "https://www.thecolorapi.com/id?hex=${color.clean}".toHttpUrl()
+    )
+    val response = client.newCall(request).execute()
+    val json = response.body.string()
+    val responseBody = jsonBuilder.decodeFromString<ColorNameResponse>(json)
+    return Palette.Name(responseBody.name.value);
+}
+
+@Serializable
+data class ColorNameResponse(
+    val name: NameResponse,
+)
+
+@Serializable
+data class NameResponse(
+    val value: String,
 )
 
 
@@ -133,7 +151,6 @@ fun generateComplementaryPalette(
     for (color in seeds) {
         val rgb = color.rgb;
         rgbColors.add(arrayOf(rgb.r, rgb.g, rgb.b))
-        // TODO: need to create a random offset so that if the same seed is passed in again, we do not create the same palette
         val complementaryRgb = arrayOf(255 - rgb.r, 255 - rgb.g, 255 - rgb.b);
         rgbColors.add(complementaryRgb);
     }
@@ -157,8 +174,8 @@ fun generateComplementaryPalette(
         val rgb = Palette.Rgb(currColor[0], currColor[1], currColor[2]);
         val hexValue = rgbToHex(currColor);
         val hex = Palette.Hex("#$hexValue", hexValue);
-        // TODO: use the Color Api to get the name of the color and add it back to the Color object
-        result.add(Palette.Color(hex, rgb));
+        val name = fetchColorName(hex);
+        result.add(Palette.Color(hex, rgb, name));
     }
     return result;
 }
@@ -192,8 +209,8 @@ fun generateAnalogicPalette(
         val rgb = Palette.Rgb(currColor[0], currColor[1], currColor[2]);
         val hexValue = rgbToHex(currColor);
         val hex = Palette.Hex("#$hexValue", hexValue);
-        // TODO: use the Color Api to get the name of the color and add it back to the Color object
-        result.add(Palette.Color(hex, rgb));
+        val name = fetchColorName(hex);
+        result.add(Palette.Color(hex, rgb, name));
     }
     return result;
 }

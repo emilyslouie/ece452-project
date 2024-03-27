@@ -267,12 +267,11 @@ fun ColorInPalette(
                 color = if (luminosity >= 0.179) Color.Black else Color.White,
                 style = typography.headlineSmall
             )
-            // TODO: put back name once we get name from Color API
-//            Text(
-//                text = color.name.value,
-//                color = if (luminosity >= 0.179) Color(35, 35, 35) else Color(230, 230, 230),
-//                style = typography.labelMedium
-//            )
+            Text(
+                text = color.name.value,
+                color = if (luminosity >= 0.179) Color(35, 35, 35) else Color(230, 230, 230),
+                style = typography.labelMedium
+            )
         }
 
         if (!generatorUiState.lockedColors.contains(color)) {

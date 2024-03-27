@@ -189,7 +189,8 @@ class GeneratorViewModel : ViewModel() {
                         255,
                         255,
                         255,
-                    )
+                    ),
+                    Palette.Name("white")
                 )
             );
             val indexToAddNewColor = currentPalette.colors.indexOf(seed) + 1;
