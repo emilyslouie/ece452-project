@@ -327,39 +327,37 @@ fun GenerationModeDropdown(generatorViewModel: GeneratorViewModel) {
 
     var expanded by remember { mutableStateOf(false) }
     // start with analogic by default
-    var selectedText by remember { mutableStateOf(GenerationMode.ANALOGIC.name) }
+    var selectedMode by remember { mutableStateOf(GenerationMode.ANALOGIC.name) }
 
-    Box() {
-        ExposedDropdownMenuBox(
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = {
+            expanded = !expanded
+        }
+    ) {
+        TextField(
+            value = "Mode: $selectedMode",
+            onValueChange = {},
+            readOnly = true,
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            modifier = Modifier
+                .menuAnchor()
+                .fillMaxWidth()
+        )
+
+        ExposedDropdownMenu(
             expanded = expanded,
-            onExpandedChange = {
-                expanded = !expanded
-            }
+            onDismissRequest = { expanded = false }
         ) {
-            TextField(
-                value = selectedText,
-                onValueChange = {},
-                readOnly = true,
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                modifier = Modifier
-                    .menuAnchor()
-                    .fillMaxWidth()
-            )
-
-            ExposedDropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false }
-            ) {
-                generationModes.forEach { mode ->
-                    DropdownMenuItem(
-                        text = { Text(text = mode.name) },
-                        onClick = {
-                            selectedText = mode.name
-                            expanded = false
-                            generatorViewModel.handleNewGenerationMode(mode)
-                        }
-                    )
-                }
+            generationModes.forEach { mode ->
+                DropdownMenuItem(
+                    text = { Text(text = mode.name) },
+                    onClick = {
+                        selectedMode = mode.name
+                        expanded = false
+                        generatorViewModel.handleNewGenerationMode(mode)
+                    }
+                )
             }
         }
     }
