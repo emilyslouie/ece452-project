@@ -62,7 +62,7 @@ class GeneratorViewModel : ViewModel() {
     }
 
     private fun getPalette(): PaletteObj {
-        val lockedColors = uiState.value.lockedColors.toMutableSet();
+        val lockedColors = currentPalette.lockedColours;
         val count = uiState.value.numberOfColours;
         var mode = uiState.value.mode;
 
