@@ -3,6 +3,7 @@ package com.example.palletify.data
 
 import com.example.palletify.ColorUtils.getAnalogousHue
 import com.example.palletify.ColorUtils.getDarkerAndLighter
+import com.example.palletify.ColorUtils.getRandomValueInGradient
 import com.example.palletify.ColorUtils.hslToRgb
 import com.example.palletify.ColorUtils.rgbToHex
 import com.example.palletify.ColorUtils.rgbToHsl
@@ -134,6 +135,7 @@ fun fetchPalette(
         GenerationMode.COMPLEMENT -> generateComplementaryPalette(seeds, count);
         GenerationMode.RANDOM -> generateRandomPalette(seeds, count);
         GenerationMode.ANALOGIC -> generateAnalogicPalette(seeds, count);
+        GenerationMode.GRADIENT -> generateGradientPalette(seeds, count);
         GenerationMode.MONOCHROME -> generateMonochromePalette(seeds, count);
         // TODO: Implement the remaining color generation algorithms
         else -> {
@@ -277,5 +279,82 @@ fun generateRandomPalette(
 ): MutableList<Palette.Color> {
     val result: MutableList<Palette.Color> = seeds.toMutableList();
     result.addAll(fetchRandomColors(count - seeds.size));
+    return result;
+}
+
+fun generateGradientPalette(
+    seeds: MutableSet<Palette.Color>,
+    count: Int
+): MutableList<Palette.Color> {
+    val result: MutableList<Palette.Color> = mutableListOf();
+    val list = seeds.toMutableList();
+
+    if (seeds.size == 1) {
+        val seed = list[0];
+        val currRgb = seed.rgb;
+        val hsl = rgbToHsl(arrayOf(currRgb.r, currRgb.g, currRgb.b));
+        // if we are adding a single new colour due to "adding an extra colour in the palette",
+        // we want to get an analogous colour to the seed colour instead of generating a random colour
+        if (count == 1) {
+            val analogousHue = getAnalogousHue(hsl[0], 0.05);
+            val analogousRgb = hslToRgb(arrayOf(analogousHue[0], hsl[1], hsl[2]));
+            val rgb = Palette.Rgb(analogousRgb[0], analogousRgb[1], analogousRgb[2]);
+            val analogousHex = rgbToHex(arrayOf(analogousRgb[0], analogousRgb[1], analogousRgb[2]));
+            val hex = Palette.Hex("#$analogousHex", analogousHex);
+            val name = fetchColorName(hex);
+            result.add(Palette.Color(hex, rgb, name));
+        } else {
+            // otherwise we want to get a random colour with the same s, l and generate colours in between the two
+            // get the hue on the opposite side of the spectrum
+            val oppositeHue = 1.0 - hsl[0];
+            result.add(seed);
+            for (step in 1..<count) {
+                val newHue = getRandomValueInGradient(hsl[0], oppositeHue, step, count - 1);
+                val newRgb = hslToRgb(arrayOf(newHue, hsl[1], hsl[2]));
+                val newHex = rgbToHex(arrayOf(newRgb[0], newRgb[1], newRgb[2]))
+                val rgb = Palette.Rgb(newRgb[0], newRgb[1], newRgb[2]);
+                val hex = Palette.Hex("#$newHex", newHex);
+                val name = fetchColorName(hex);
+                result.add(Palette.Color(hex, rgb, name));
+            }
+        }
+    } else {
+        // interpolate between the two or more locked colours
+        // ideally we would know what order the locked colours are in so that we can generate a gradient in the available slots between each locked colour
+        // in this case, if there are two seeds we will just assume that the remaining slots are to be filled with colours in between
+        // if there are more than 2 seeds, we will assume there can be 2 colours generated between each one until we reach our specified count
+        // this works because we currently have a known max size of 6
+        result.add(list[0])
+        for (currSeed in 0..<seeds.size - 1) {
+            val firstColor = list[currSeed];
+            val firstHsl = rgbToHsl(arrayOf(firstColor.rgb.r, firstColor.rgb.g, firstColor.rgb.b));
+
+            val secondColor = list[currSeed + 1];
+            val secondHsl =
+                rgbToHsl(arrayOf(secondColor.rgb.r, secondColor.rgb.g, secondColor.rgb.b));
+
+            val numOfResults = if (seeds.size == 2) count else 2;
+
+            for (step in 1..numOfResults) {
+                // if we reached one before the max size, then stop generating new ones
+                if (result.size == count - 1) {
+                    break;
+                }
+                val newHue = getRandomValueInGradient(firstHsl[0], secondHsl[0], step, numOfResults)
+                val newSat = getRandomValueInGradient(firstHsl[1], secondHsl[1], step, numOfResults)
+                val newLight =
+                    getRandomValueInGradient(firstHsl[2], secondHsl[2], step, numOfResults)
+                val newRgb = hslToRgb(arrayOf(newHue, newSat, newLight));
+                val newHex = rgbToHex(arrayOf(newRgb[0], newRgb[1], newRgb[2]))
+                val rgb = Palette.Rgb(newRgb[0], newRgb[1], newRgb[2]);
+                val hex = Palette.Hex("#$newHex", newHex);
+                val name = fetchColorName(hex);
+                result.add(Palette.Color(hex, rgb, name));
+            }
+            result.add(secondColor);
+        }
+
+    }
+
     return result;
 }

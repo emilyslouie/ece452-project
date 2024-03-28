@@ -62,9 +62,7 @@ class GeneratorViewModel : ViewModel() {
     }
 
     private fun getPalette(): PaletteObj {
-        // Changed this to use the locked colours from the current palette instead of state
         // When we undo to an old palette, that may have had different locked colours
-        // We want to generate a new palette using those
         val lockedColors = currentPalette.lockedColours;
         val count = uiState.value.numberOfColours;
         var mode = uiState.value.mode;
