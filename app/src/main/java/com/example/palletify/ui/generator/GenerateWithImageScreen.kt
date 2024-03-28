@@ -1,6 +1,7 @@
 package com.example.palletify.ui.generator
 
 import android.net.Uri
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -25,8 +26,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -45,6 +48,10 @@ import coil.compose.rememberImagePainter
 import com.example.palletify.R
 import com.example.palletify.database.PaletteViewModel
 import java.lang.Long.parseLong
+import com.example.palletify.ui.generator.GenerateWithImage.convertImageUrlToBitmap
+import com.example.palletify.ui.generator.GenerateWithImage.extractColorsFromBitmap
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,6 +66,41 @@ fun GenerateWithImageScreen(
 
     val colors = remember { mutableStateListOf(0xFFfff7b2, 0xFFccf865, 0xFF49cc6e, 0xFF9b7367, 0xFF775798)};
     val otherColors = remember { mutableStateListOf(0xFFfff7b2, 0xFFccf865)};
+
+    val colorPalette by generatorViewModel.colorPalette
+
+    var launchedEffectTriggered by remember { mutableStateOf(false) }
+
+//    val imageUrl by generatorViewModel.imageUrl// find what the image url is
+    val imageUrl = uploadedImageUri.toString()
+
+    LaunchedEffect(key1 = true) {
+        try {
+            val bitmap = convertImageUrlToBitmap(
+                imageUrl = imageUrl,
+                context = context
+            )
+            if (bitmap != null) {
+                launchedEffectTriggered = true
+                generatorViewModel.setColorPaletteFromImage(
+                    colors = extractColorsFromBitmap(
+                        bitmap = bitmap
+                    )
+                )
+            }
+        } catch (e: Exception) {
+            Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+//    if (colorPalette.isNotEmpty() && launchedEffectTriggered) {
+//        PaletteMainScreen(
+//            paletteViewModel = paletteViewModel,
+//            colors = colorPalette,
+//            imageUrl = imageUrl,
+//            navController = navController
+//        )
+//    }
 
     Scaffold(
         topBar = {
