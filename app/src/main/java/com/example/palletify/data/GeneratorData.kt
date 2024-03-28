@@ -223,7 +223,6 @@ fun generateMonochromePalette(
     val rgbColors: MutableList<Array<Int>> = mutableListOf();
 
     // if there are multiple seeds, average their rgb values and use that as a single seed
-    // (can change this later, not sure if it looks amazing)
     var rSum = 0
     var gSum = 0
     var bSum = 0
@@ -239,25 +238,24 @@ fun generateMonochromePalette(
     val averageRgbSeed = arrayOf(rSum / seeds.count(), gSum / seeds.count(), bSum / seeds.count())
     val hslSeed = rgbToHsl(averageRgbSeed);
 
-    val countAsDouble = count.toDouble()
-    var currentCount: Double = rgbColors.count().toDouble()
-    val randomOffset = Random.nextDouble(0.05, 0.15)
-    // can adjust this
-    val step = 1
+    val start = rgbColors.count()
+    // use random step size to generate new palettes off of the same seeds
+    // randomize sign of step so we aren't always increasing/decreasing S and L
+    val step = Random.nextDouble(0.2, 1.0)
 
-    while (currentCount < countAsDouble) {
+    for (i in start..<count) {
         // keep hue the same, modify saturation and lightness by even step size based on # of colours
-        // add random offset to generate new palettes off of the same seeds
         // S and L are both decimals from 0 to 1 so use modulo to bound
-        val newSaturation = (hslSeed[1] + step * currentCount / countAsDouble + randomOffset) % 1
-        val newLightness = (hslSeed[2] + step * currentCount / countAsDouble + randomOffset) % 1
+        val newSaturation =
+            (hslSeed[1] + step * i.toDouble() / count.toDouble()) % 1
+        val newLightness =
+            (hslSeed[2] + step * i.toDouble() / count.toDouble()) % 1
 
         // create new rgb colour
         val newRgbColour = hslToRgb(arrayOf(hslSeed[0], newSaturation, newLightness))
 
         // add to array
         rgbColors.add(newRgbColour)
-        currentCount++
     }
 
     // get colour names and convert from rgb colours into Palette.Color objects

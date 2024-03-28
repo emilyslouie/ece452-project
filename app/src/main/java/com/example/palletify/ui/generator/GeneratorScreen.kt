@@ -327,7 +327,7 @@ fun GenerationModeDropdown(generatorViewModel: GeneratorViewModel) {
 
     var expanded by remember { mutableStateOf(false) }
     // start with analogic by default
-    var selectedMode by remember { mutableStateOf(GenerationMode.ANALOGIC.name) }
+    var selectedMode by remember { mutableStateOf(GenerationMode.ANY.name) }
 
     ExposedDropdownMenuBox(
         expanded = expanded,

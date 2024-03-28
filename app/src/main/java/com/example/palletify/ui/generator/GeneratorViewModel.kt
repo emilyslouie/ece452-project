@@ -88,8 +88,6 @@ class GeneratorViewModel : ViewModel() {
             mode
         );
 
-        // Note that if a user locks a colour, that colour is now guaranteed
-        // to be present in the new palette, so lockedColors will persist
         return PaletteObj(count, colors, mode, lockedColors);
     }
 
@@ -113,7 +111,6 @@ class GeneratorViewModel : ViewModel() {
             currentState.copy(
                 numberOfColours = palette.numberOfColours,
                 currentPalette = palette.colors.toMutableList(),
-                mode = palette.mode,
                 lockedColors = palette.lockedColours.toMutableSet(),
             )
         }
