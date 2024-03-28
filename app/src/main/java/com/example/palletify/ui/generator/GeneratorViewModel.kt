@@ -62,6 +62,7 @@ class GeneratorViewModel : ViewModel() {
     }
 
     private fun getPalette(): PaletteObj {
+        // TODO: Change this to use locked colours from currentPalette (PaletteObj) instead of state
         val lockedColors = uiState.value.lockedColors.toMutableSet();
         val count = uiState.value.numberOfColours;
         var mode = uiState.value.mode;
@@ -84,9 +85,6 @@ class GeneratorViewModel : ViewModel() {
             count,
             mode
         );
-
-        // For now, reset the mode to ANY, change this once we have a picker
-        mode = GenerationMode.ANY;
 
         return PaletteObj(count, colors, mode, lockedColors);
     }
