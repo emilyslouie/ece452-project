@@ -62,7 +62,10 @@ class GeneratorViewModel : ViewModel() {
     }
 
     private fun getPalette(): PaletteObj {
-        val lockedColors = uiState.value.lockedColors.toMutableSet();
+        // Changed this to use the locked colours from the current palette instead of state
+        // When we undo to an old palette, that may have had different locked colours
+        // We want to generate a new palette using those
+        val lockedColors = currentPalette.lockedColours;
         val count = uiState.value.numberOfColours;
         var mode = uiState.value.mode;
 
@@ -84,9 +87,6 @@ class GeneratorViewModel : ViewModel() {
             count,
             mode
         );
-
-        // For now, reset the mode to ANY, change this once we have a picker
-        mode = GenerationMode.ANY;
 
         return PaletteObj(count, colors, mode, lockedColors);
     }
@@ -111,7 +111,6 @@ class GeneratorViewModel : ViewModel() {
             currentState.copy(
                 numberOfColours = palette.numberOfColours,
                 currentPalette = palette.colors.toMutableList(),
-                mode = palette.mode,
                 lockedColors = palette.lockedColours.toMutableSet(),
             )
         }
@@ -254,6 +253,17 @@ class GeneratorViewModel : ViewModel() {
                 // If we set lockedColors = currentPalette.lockedColours, then even though the contents
                 // of the set change, the ui state sees same reference address, so won't recompose
                 lockedColors = newLockedColors
+            );
+        }
+    }
+
+    /*
+    * Update the generation mode
+    */
+    fun handleNewGenerationMode(newMode: GenerationMode) {
+        _uiState.update { currentState ->
+            currentState.copy(
+                mode = newMode
             );
         }
     }
