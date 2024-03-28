@@ -233,16 +233,17 @@ fun generateMonochromePalette(
         rSum += rgb.r
         gSum += rgb.g
         bSum += rgb.b
+        rgbColors.add(arrayOf(rgb.r, rgb.g, rgb.b))
     }
     // set seed to averaged rgb values from all seeds
     val averageRgbSeed = arrayOf(rSum / seeds.count(), gSum / seeds.count(), bSum / seeds.count())
-    rgbColors.add(averageRgbSeed)
     val hslSeed = rgbToHsl(averageRgbSeed);
 
     val countAsDouble = count.toDouble()
-    var currentCount: Double = 1.0
+    var currentCount: Double = rgbColors.count().toDouble()
     val randomOffset = Random.nextDouble(0.05, 0.15)
-    val step = 0.2
+    // can adjust this
+    val step = 1
 
     while (currentCount < countAsDouble) {
         // keep hue the same, modify saturation and lightness by even step size based on # of colours
