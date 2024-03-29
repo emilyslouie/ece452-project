@@ -27,3 +27,4 @@
 | 03/27/2024 | 5    |          |       |             |        |      | Add menu to choose generation mode, add monochrome generation mode |
 | 03/28/2024 |      |          | 8     |             |        |      | Add gradient colour generator mode                                 |
 | 03/29/2024 |      |          | 8     |             |        |      | Create list of trademarked colours and warn user if used           |
+| 03/29/2024 |      |          | 3     |             |        |      | When adding new colours, generate it using our algorithms          |
