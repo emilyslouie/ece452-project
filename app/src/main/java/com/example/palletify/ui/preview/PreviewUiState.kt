@@ -10,6 +10,7 @@ data class PreviewUiState(
     val colors: MutableList<Palette.Color> = mutableListOf(),
     val currentColor: Palette.Color = Palette.Color(
         Hex("#FFFFFF", "FFFFFF"),
-        Palette.Rgb(255, 255, 255)
+        Palette.Rgb(255, 255, 255),
+        Palette.Name("white")
     )
 )

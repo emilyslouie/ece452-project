@@ -8,6 +8,7 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.roundToInt
+import kotlin.random.Random
 
 object ColorUtils {
     fun hexToComposeColor(hex: Palette.Hex): Color {
@@ -134,6 +135,16 @@ object ColorUtils {
         return arrayOf((r * 255).roundToInt(), (g * 255).roundToInt(), (b * 255).roundToInt());
     }
 
+    fun interpolate(
+        startValue: Double,
+        endValue: Double,
+        stepNumber: Int,
+        lastStepNumber: Int
+    ): Double {
+        return (endValue - startValue) * (stepNumber.toDouble() / lastStepNumber.toDouble()) + startValue
+    }
+
+
     // Used to get 2 lightness values that are significantly different from the seed lightness
     fun getDarkerAndLighter(lightness: Double, offset: Double): Array<Double> {
         val result = arrayOf(lightness, lightness);
@@ -166,5 +177,17 @@ object ColorUtils {
             result[1] = hue - offset;
         }
         return result;
+    }
+
+    fun getRandomValueInGradient(
+        firstValue: Double,
+        secondValue: Double,
+        step: Int,
+        numOfResults: Int
+    ): Double {
+        val randVal = interpolate(firstValue, secondValue, step, numOfResults);
+        val lowerBound = if (randVal == 1.0) 0.0 else 0.01;
+        val upperBound = if (randVal > 0.9) 1 - randVal else 0.1;
+        return randVal + Random.nextDouble(lowerBound, upperBound);
     }
 }

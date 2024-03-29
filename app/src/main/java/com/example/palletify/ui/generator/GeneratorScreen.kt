@@ -21,12 +21,17 @@ import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -47,6 +52,7 @@ import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.palletify.ColorUtils.hexToComposeColor
+import com.example.palletify.data.GenerationMode
 import com.example.palletify.database.Palette
 import com.example.palletify.database.PaletteViewModel
 import com.example.palletify.ui.components.BottomSheet
@@ -119,12 +125,14 @@ fun GeneratorScreen(generatorViewModel: GeneratorViewModel = viewModel()) {
                         // TODO: ensure that when the "more options button" is placed, that the generate button is in the middle
                     ) {
                         Row() {
+                            // Undo button
                             IconButton(
                                 onClick = { generatorViewModel.handleUndo() },
                                 enabled = generatorUiState.palettesInUndoStack > 0
                             ) {
                                 Icon(Icons.AutoMirrored.Filled.Undo, contentDescription = "Undo");
                             }
+                            // Redo button
                             IconButton(
                                 onClick = { generatorViewModel.handleRedo() },
                                 enabled = generatorUiState.palettesInRedoStack > 0
@@ -132,6 +140,7 @@ fun GeneratorScreen(generatorViewModel: GeneratorViewModel = viewModel()) {
                                 Icon(Icons.AutoMirrored.Filled.Redo, contentDescription = "Redo");
                             }
                         }
+                        // Generate button
                         Button(onClick = {
                             thread { generatorViewModel.getNewPalette() }
                         }) {
@@ -177,21 +186,30 @@ fun GeneratorScreen(generatorViewModel: GeneratorViewModel = viewModel()) {
                     .statusBarsPadding()
                     .safeDrawingPadding()
                     .padding(innerPadding)
-                    .fillMaxHeight()
-                    .onGloballyPositioned { coordinates ->
-                        // Get the available height of the container
-                        columnHeightDp = with(localDensity) { coordinates.size.height.toDp() }
-                    },
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .fillMaxWidth()
             ) {
-                Palette(
-                    generatorViewModel = generatorViewModel,
-                    colors = generatorUiState.currentPalette,
-                    numOfColors = generatorUiState.numberOfColours,
-                    heightAvailable = columnHeightDp
-                ) { selectedColor ->
-                    activeColor = selectedColor
+                // Dropdown menu to select a generation mode
+                GenerationModeDropdown(generatorViewModel)
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .onGloballyPositioned { coordinates ->
+                            // Get the available height of the container
+                            columnHeightDp =
+                                with(localDensity) { coordinates.size.height.toDp() }
+                        },
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Palette(
+                        generatorViewModel = generatorViewModel,
+                        colors = generatorUiState.currentPalette,
+                        numOfColors = generatorUiState.numberOfColours,
+                        heightAvailable = columnHeightDp
+                    ) { selectedColor ->
+                        activeColor = selectedColor
+                    }
                 }
             }
         }
@@ -267,12 +285,11 @@ fun ColorInPalette(
                 color = if (luminosity >= 0.179) Color.Black else Color.White,
                 style = typography.headlineSmall
             )
-            // TODO: put back name once we get name from Color API
-//            Text(
-//                text = color.name.value,
-//                color = if (luminosity >= 0.179) Color(35, 35, 35) else Color(230, 230, 230),
-//                style = typography.labelMedium
-//            )
+            Text(
+                text = color.name.value,
+                color = if (luminosity >= 0.179) Color(35, 35, 35) else Color(230, 230, 230),
+                style = typography.labelMedium
+            )
         }
 
         if (!generatorUiState.lockedColors.contains(color)) {
@@ -301,6 +318,50 @@ fun ColorInPalette(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun GenerationModeDropdown(generatorViewModel: GeneratorViewModel) {
+    val context = LocalContext.current
+    val generatorUiState by generatorViewModel.uiState.collectAsStateWithLifecycle()
+    val generationModes = GenerationMode.entries.toTypedArray()
+
+    var expanded by remember { mutableStateOf(false) }
+    // start with analogic by default
+    var selectedMode by remember { mutableStateOf(GenerationMode.ANY.name) }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = {
+            expanded = !expanded
+        }
+    ) {
+        TextField(
+            value = "Mode: $selectedMode",
+            onValueChange = {},
+            readOnly = true,
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            modifier = Modifier
+                .menuAnchor()
+                .fillMaxWidth()
+        )
+
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            generationModes.forEach { mode ->
+                DropdownMenuItem(
+                    text = { Text(text = mode.name) },
+                    onClick = {
+                        selectedMode = mode.name
+                        expanded = false
+                        generatorViewModel.handleNewGenerationMode(mode)
+                    }
+                )
+            }
+        }
+    }
+}
 
 @Preview(showBackground = true)
 @Composable

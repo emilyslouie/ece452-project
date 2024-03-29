@@ -74,7 +74,8 @@ class GeneratorViewModel : ViewModel() {
     }
 
     private fun getPalette(): PaletteObj {
-        val lockedColors = uiState.value.lockedColors.toMutableSet();
+        // When we undo to an old palette, that may have had different locked colours
+        val lockedColors = currentPalette.lockedColours;
         val count = uiState.value.numberOfColours;
         var mode = uiState.value.mode;
 
@@ -96,9 +97,6 @@ class GeneratorViewModel : ViewModel() {
             count,
             mode
         );
-
-        // For now, reset the mode to ANY, change this once we have a picker
-        mode = GenerationMode.ANY;
 
         return PaletteObj(count, colors, mode, lockedColors);
     }
@@ -123,7 +121,6 @@ class GeneratorViewModel : ViewModel() {
             currentState.copy(
                 numberOfColours = palette.numberOfColours,
                 currentPalette = palette.colors.toMutableList(),
-                mode = palette.mode,
                 lockedColors = palette.lockedColours.toMutableSet(),
             )
         }
@@ -201,7 +198,8 @@ class GeneratorViewModel : ViewModel() {
                         255,
                         255,
                         255,
-                    )
+                    ),
+                    Palette.Name("white")
                 )
             );
             val indexToAddNewColor = currentPalette.colors.indexOf(seed) + 1;
@@ -268,8 +266,22 @@ class GeneratorViewModel : ViewModel() {
             );
         }
     }
-
+    
+    /*
+    * Set colors in color palette based off an image
+    */
     fun setColorPaletteFromImage(colors: Map<String,String>) {
         _colorPalette.value = colors
+    }
+    
+    /*
+    * Update the generation mode
+    */
+    fun handleNewGenerationMode(newMode: GenerationMode) {
+        _uiState.update { currentState ->
+            currentState.copy(
+                mode = newMode
+            );
+        }
     }
 }
