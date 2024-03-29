@@ -5,5 +5,6 @@
     <string name="upload_photo">Upload a photo to generate colours</string>
     <string name="retake_photo">Retake Photo</string>
     <string name="use_photo">Use Photo</string>
-
+    <string name="confirm">Confirm</string>
+    <string name="cancel">Cancel</string>
 </resources>

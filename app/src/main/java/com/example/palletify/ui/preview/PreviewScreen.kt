@@ -60,6 +60,40 @@ import com.example.palletify.ColorUtils.hexToComposeColor
 import com.example.palletify.R
 import com.example.palletify.ui.theme.PalletifyTheme
 import kotlin.random.Random
+import android.util.Log
+import com.github.skydoves.colorpicker.compose.HsvColorPicker
+import com.github.skydoves.colorpicker.compose.AlphaSlider
+import com.github.skydoves.colorpicker.compose.BrightnessSlider
+import com.github.skydoves.colorpicker.compose.rememberColorPickerController
+import com.github.skydoves.colorpicker.compose.ColorPickerController
+import com.github.skydoves.colorpicker.compose.AlphaTile
+import com.example.palletify.data.Palette
+import androidx.compose.ui.window.Dialog
+
+fun Palette.Color.toComposeColor(): Color {
+    // Parse the hex string to a Long and create a Color
+    return Color(android.graphics.Color.parseColor(this.hex.value))
+}
+
+fun Color.toPaletteColor(): Palette.Color {
+    // Convert the floating-point values to 0-255 and then to a hex string
+    val redValue = (this.red * 255).toInt()
+    val greenValue = (this.green * 255).toInt()
+    val blueValue = (this.blue * 255).toInt()
+    val alphaValue = (this.alpha * 255).toInt()
+
+    // Format the ARGB components to a hex string, including the alpha channel
+    val hexValue = String.format("#%02X%02X%02X%02X", alphaValue, redValue, greenValue, blueValue)
+    val cleanHexValue = hexValue.substring(1)
+
+    val namePlaceholder = "Color-$cleanHexValue"
+    
+    return Palette.Color(
+        hex = Palette.Hex(hexValue, cleanHexValue),
+        rgb = Palette.Rgb(redValue, greenValue, blueValue),
+        name = Palette.Name(namePlaceholder)
+    )
+}
 
 @Composable
 fun OutlinedRadioButtonWithText(
@@ -226,6 +260,83 @@ fun RadioButtonGroup(
     }
 }
 
+@Composable
+fun ColorPickerDialog(
+    controller: ColorPickerController,
+    onDismissRequest: () -> Unit,
+    initialColor: Color,
+    onColorChanged: (Color) -> Unit,
+    onSave: (Color) -> Unit
+) {
+    Dialog(onDismissRequest = onDismissRequest) {
+        Card {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                HsvColorPicker(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 300.dp) // Adjust height as needed
+                        .padding(10.dp),
+                    controller = controller,
+                    initialColor = initialColor
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                AlphaSlider(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp)
+                        .height(35.dp),
+                    controller = controller,
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                BrightnessSlider(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp)
+                        .height(35.dp),
+                    controller = controller,
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                AlphaTile(
+                    modifier = Modifier
+                        .size(80.dp),
+                    controller = controller
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    Button(
+                        onClick = onDismissRequest,
+                        modifier = Modifier.padding(end = 8.dp)
+                    ) {
+                        Text("Cancel")
+                    }
+                    Button(
+                        onClick = {
+                            val c = controller.selectedColor
+                            onSave(c.value) // Save the selected color
+                            onDismissRequest() // Dismiss the dialog
+                        }
+                    ) {
+                        Text("Save")
+                    }
+                }
+            }
+        }
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -233,6 +344,16 @@ fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
     val previewUiState by previewViewModel.uiState.collectAsStateWithLifecycle()
     val imagePainter = painterResource(id = R.drawable.profile)
     val scrollState = rememberScrollState()
+
+    val showColorPicker = remember { mutableStateOf(false) }
+    val controller = rememberColorPickerController()
+    val whitePaletteColor = Palette.Color(
+        hex = Palette.Hex("#FFFFFF", "FFFFFF"),
+        rgb = Palette.Rgb(255, 255, 255),
+        name = Palette.Name("White")
+    )
+    val selectedColor = remember { mutableStateOf(previewUiState.currentColor ?: whitePaletteColor) }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -247,7 +368,11 @@ fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
                 actions = {
                     previewUiState.colors.forEach { color ->
                         Button(
-                            onClick = { previewViewModel.setCurrentColor(color) },
+                            onClick = {
+//                                selectedColor.value = color
+                                previewViewModel.setCurrentColor(color)
+                                showColorPicker.value = true
+                            },
                             modifier = Modifier
                                 .size(48.dp)
                                 .padding(8.dp),
@@ -263,6 +388,20 @@ fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
             )
         },
     ) { innerPadding ->
+        if (showColorPicker.value) {
+            ColorPickerDialog(
+                controller = controller,
+                onDismissRequest = { showColorPicker.value = false },
+                onColorChanged = { color ->
+                },
+                initialColor = previewUiState.currentColor.toComposeColor(),
+                onSave = { color ->
+                    Log.d("Color picker", "selected color: ${color}")
+                    previewViewModel.setCurrentColor(color.toPaletteColor())
+                    showColorPicker.value = false
+                }
+            )
+        }
         Column(
             modifier = Modifier
                 .fillMaxSize()
