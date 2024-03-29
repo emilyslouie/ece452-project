@@ -12,6 +12,7 @@ import coil.request.ImageRequest
 import coil.request.SuccessResult
 import com.example.palletify.data.GenerationMode
 import com.example.palletify.data.Palette
+import com.example.palletify.data.TrademarkedColor
 import com.example.palletify.data.fetchPalette
 import com.example.palletify.data.fetchRandomColors
 import com.example.palletify.data.getRandomGenerationMode
@@ -56,6 +57,7 @@ class GeneratorViewModel : ViewModel() {
 
     private val _colorPalette: MutableState<Map<String, String>> = mutableStateOf(mapOf())
     val colorPalette: State<Map<String, String>> = _colorPalette
+    val trademarkedColor = TrademarkedColor();
 
     init {
         thread {

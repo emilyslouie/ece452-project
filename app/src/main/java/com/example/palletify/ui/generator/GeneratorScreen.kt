@@ -56,6 +56,7 @@ import com.example.palletify.data.GenerationMode
 import com.example.palletify.database.Palette
 import com.example.palletify.database.PaletteViewModel
 import com.example.palletify.ui.components.BottomSheet
+import com.example.palletify.ui.components.TrademarkComponentWrapper
 import com.example.palletify.ui.theme.PalletifyTheme
 import kotlin.concurrent.thread
 import kotlin.math.pow
@@ -264,58 +265,64 @@ fun ColorInPalette(
     val generatorUiState by generatorViewModel.uiState.collectAsStateWithLifecycle()
     val luminosity =
         calculateLuminosity(color.rgb.r, color.rgb.g, color.rgb.b)
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(heightPerColor)
-            .background(hexToComposeColor(color.hex))
-            .padding(16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-
-        ) {
-        Column(
+    TrademarkComponentWrapper(
+        color = color,
+        list = generatorViewModel.trademarkedColor.hexes,
+        map = generatorViewModel.trademarkedColor.colorsMap
+    ) {
+        Row(
             modifier = Modifier
-                .padding(top = 16.dp, bottom = 16.dp)
-                .clickable { onItemClick(color) }
-        ) {
-            Text(
-                modifier = Modifier.padding(bottom = 4.dp),
-                text = color.hex.clean,
-                color = if (luminosity >= 0.179) Color.Black else Color.White,
-                style = typography.headlineSmall
-            )
-            Text(
-                text = color.name.value,
-                color = if (luminosity >= 0.179) Color(35, 35, 35) else Color(230, 230, 230),
-                style = typography.labelMedium
-            )
-        }
+                .fillMaxWidth()
+                .height(heightPerColor)
+                .background(hexToComposeColor(color.hex))
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
 
-        if (!generatorUiState.lockedColors.contains(color)) {
-            // Button to lock a colour
-            IconButton(
-                onClick = { generatorViewModel.handleLockForColor(color) }
             ) {
-                Icon(
-                    Icons.Filled.LockOpen,
-                    contentDescription = "Lock a colour",
-                    tint = if (luminosity >= 0.179) Color.Black else Color.White
+            Column(
+                modifier = Modifier
+                    .clickable { onItemClick(color) }
+            ) {
+                Text(
+                    modifier = Modifier.padding(bottom = 2.dp),
+                    text = color.hex.clean,
+                    color = if (luminosity >= 0.179) Color.Black else Color.White,
+                    style = typography.headlineSmall
+                )
+                Text(
+                    text = color.name.value,
+                    color = if (luminosity >= 0.179) Color(35, 35, 35) else Color(230, 230, 230),
+                    style = typography.labelMedium
                 )
             }
-        } else {
-            // Button to unlock a colour
-            IconButton(
-                onClick = { generatorViewModel.handleUnlockForColor(color) }
-            ) {
-                Icon(
-                    Icons.Filled.Lock,
-                    contentDescription = "Unlock a colour",
-                    tint = if (luminosity >= 0.179) Color.Black else Color.White
-                )
+
+            if (!generatorUiState.lockedColors.contains(color)) {
+                // Button to lock a colour
+                IconButton(
+                    onClick = { generatorViewModel.handleLockForColor(color) }
+                ) {
+                    Icon(
+                        Icons.Filled.LockOpen,
+                        contentDescription = "Lock a colour",
+                        tint = if (luminosity >= 0.179) Color.Black else Color.White
+                    )
+                }
+            } else {
+                // Button to unlock a colour
+                IconButton(
+                    onClick = { generatorViewModel.handleUnlockForColor(color) }
+                ) {
+                    Icon(
+                        Icons.Filled.Lock,
+                        contentDescription = "Unlock a colour",
+                        tint = if (luminosity >= 0.179) Color.Black else Color.White
+                    )
+                }
             }
         }
     }
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
