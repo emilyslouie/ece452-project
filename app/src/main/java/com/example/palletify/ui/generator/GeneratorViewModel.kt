@@ -3,6 +3,7 @@ package com.example.palletify.ui.generator
 import androidx.lifecycle.ViewModel
 import com.example.palletify.data.GenerationMode
 import com.example.palletify.data.Palette
+import com.example.palletify.data.TrademarkedColor
 import com.example.palletify.data.fetchPalette
 import com.example.palletify.data.fetchRandomColors
 import com.example.palletify.data.getRandomGenerationMode
@@ -44,6 +45,8 @@ class GeneratorViewModel : ViewModel() {
     // Stacks to keep palettes that can be undone and redone
     private var undoPalettes: ArrayDeque<PaletteObj> = ArrayDeque();
     private var redoPalettes: ArrayDeque<PaletteObj> = ArrayDeque();
+
+    val trademarkedColor = TrademarkedColor();
 
     init {
         thread {
