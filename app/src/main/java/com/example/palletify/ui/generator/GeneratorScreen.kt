@@ -91,7 +91,9 @@ fun GeneratorScreen(generatorViewModel: GeneratorViewModel = viewModel()) {
                             )
                             activeColor = null
                         }
-                    ), text = "Add a new color to palette")
+                    ),
+                        color = if (generatorUiState.numberOfColours < 6) Color.Black else Color.LightGray,
+                        text = "Add a new color to palette")
                 }
                 HorizontalDivider()
                 Row(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
@@ -103,7 +105,9 @@ fun GeneratorScreen(generatorViewModel: GeneratorViewModel = viewModel()) {
                             )
                             activeColor = null
                         }
-                    ), text = "Remove this color from palette")
+                    ),
+                        color = if (generatorUiState.numberOfColours > 3) Color.Black else Color.LightGray,
+                        text = "Remove this color from palette")
                 }
             }
 
