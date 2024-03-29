@@ -268,7 +268,7 @@ fun ColorInPalette(
         modifier = Modifier
             .fillMaxWidth()
             .height(heightPerColor)
-            .background(hexToComposeColor(color.hex))
+            .background(hexToComposeColor(color.hex.value.toString()))
             .padding(16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
