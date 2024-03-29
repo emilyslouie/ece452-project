@@ -35,6 +35,8 @@ import com.example.palletify.ui.library.Library
 import com.example.palletify.ui.preview.PreviewScreen
 import com.example.palletify.ui.theme.PalletifyTheme
 import kotlinx.coroutines.launch
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.palletify.ui.preview.PreviewViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,6 +65,7 @@ fun NavDrawer() {
     val coroutineScope = rememberCoroutineScope()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val context = LocalContext.current.applicationContext
+    val previewViewModel: PreviewViewModel = viewModel()
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -130,8 +133,8 @@ fun NavDrawer() {
                 startDestination = Screens.Home.screen
             ) {
                 composable(Screens.Home.screen) { HomeScreen(navigationController) }
-                composable(Screens.Library.screen) { Library(context) }
-                composable(Screens.PreviewScreen.screen) { PreviewScreen() }
+                composable(Screens.Library.screen) { Library(context, navigationController) }
+                composable(Screens.PreviewScreen.screen) { PreviewScreen(previewViewModel) }
                 composable(Screens.GenerateScreen.screen) { GeneratorScreen() }
             }
         }
