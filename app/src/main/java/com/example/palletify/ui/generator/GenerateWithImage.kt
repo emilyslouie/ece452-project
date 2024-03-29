@@ -1,4 +1,4 @@
-package com.example.imagecolorpicker
+package com.example.palletify.ui.generator
 
 import android.content.Context
 import android.graphics.Bitmap

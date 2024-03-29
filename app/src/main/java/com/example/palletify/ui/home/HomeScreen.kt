@@ -53,8 +53,8 @@ import androidx.navigation.NavController
 import androidx.palette.graphics.Palette
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
-import com.example.imagecolorpicker.GenerateWithImage.extractColorsFromBitmap
-import com.example.imagecolorpicker.GenerateWithImage.convertImageUrlToBitmap
+import com.example.palletify.ui.generator.GenerateWithImage.extractColorsFromBitmap
+import com.example.palletify.ui.generator.GenerateWithImage.convertImageUrlToBitmap
 import java.util.Objects
 import com.example.palletify.BuildConfig
 import com.example.palletify.R
