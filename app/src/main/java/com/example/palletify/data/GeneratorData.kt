@@ -278,7 +278,11 @@ fun generateRandomPalette(
     count: Int
 ): MutableList<Palette.Color> {
     val result: MutableList<Palette.Color> = seeds.toMutableList();
-    result.addAll(fetchRandomColors(count - seeds.size));
+    val numOfColors = if (count == 1) 1 else count - seeds.size;
+    if (count == 1) {
+        result.clear();
+    }
+    result.addAll(fetchRandomColors(numOfColors));
     return result;
 }
 
