@@ -144,6 +144,16 @@ class GeneratorViewModel : ViewModel() {
         }
     }
 
+    private fun getColorMatchingPalette(mainColor: Palette.Color): Palette.Color {
+        val newColor = fetchPalette(
+            mutableSetOf(mainColor),
+            1,
+            currentPalette.mode
+        )[0];
+
+        return newColor;
+    }
+
     /*
     * Handle undo to go back to the previous palette
     */
@@ -185,29 +195,23 @@ class GeneratorViewModel : ViewModel() {
     * Handle increase number of colors shown in the palette
     */
     fun handleIncreaseNumOfColors(seed: Palette.Color) {
-        if (currentPalette.numberOfColours < MAX_NUMBER_OF_COLORS) {
-            currentPalette.numberOfColours++;
-            val newColors = listOf<Palette.Color>(
-                Palette.Color(
-                    Palette.Hex("#FFFFFF", "FFFFFF"),
-                    Palette.Rgb(
-                        255,
-                        255,
-                        255,
-                    ),
-                    Palette.Name("white")
-                )
-            );
-            val indexToAddNewColor = currentPalette.colors.indexOf(seed) + 1;
-            currentPalette.colors.add(indexToAddNewColor, newColors[0]);
-            val newPalette = currentPalette.colors.toMutableList();
-            _uiState.update { currentState ->
-                currentState.copy(
-                    numberOfColours = currentPalette.numberOfColours,
-                    currentPalette = newPalette
-                )
+        thread {
+            if (currentPalette.numberOfColours < MAX_NUMBER_OF_COLORS) {
+                val newCount = currentPalette.numberOfColours + 1;
+                currentPalette.numberOfColours = newCount;
+                val newColor = getColorMatchingPalette(seed);
+                val indexToAddNewColor = currentPalette.colors.indexOf(seed) + 1;
+                currentPalette.colors.add(indexToAddNewColor, newColor);
+                val newPalette = currentPalette.colors.toMutableList();
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        numberOfColours = newCount,
+                        currentPalette = newPalette
+                    )
+                }
             }
         }
+
     }
 
     /*
@@ -215,12 +219,13 @@ class GeneratorViewModel : ViewModel() {
     */
     fun handleDecreaseNumOfColors(color: Palette.Color) {
         if (currentPalette.numberOfColours > MIN_NUMBER_OF_COLORS) {
-            currentPalette.numberOfColours--;
+            val newCount = currentPalette.numberOfColours - 1;
+            currentPalette.numberOfColours = newCount
             currentPalette.colors.remove(color);
             val newPalette = currentPalette.colors.toMutableList();
             _uiState.update { currentState ->
                 currentState.copy(
-                    numberOfColours = currentPalette.numberOfColours,
+                    numberOfColours = newCount,
                     currentPalette = newPalette
                 )
             }
