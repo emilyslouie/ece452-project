@@ -1,6 +1,15 @@
 package com.example.palletify.ui.generator
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import coil.ImageLoader
+import coil.request.ImageRequest
+import coil.request.SuccessResult
 import com.example.palletify.data.GenerationMode
 import com.example.palletify.data.Palette
 import com.example.palletify.data.TrademarkedColor
@@ -46,6 +55,8 @@ class GeneratorViewModel : ViewModel() {
     private var undoPalettes: ArrayDeque<PaletteObj> = ArrayDeque();
     private var redoPalettes: ArrayDeque<PaletteObj> = ArrayDeque();
 
+    private val _colorPalette: MutableState<Map<String, String>> = mutableStateOf(mapOf())
+    val colorPalette: State<Map<String, String>> = _colorPalette
     val trademarkedColor = TrademarkedColor();
 
     init {
@@ -257,7 +268,14 @@ class GeneratorViewModel : ViewModel() {
             );
         }
     }
-
+    
+    /*
+    * Set colors in color palette based off an image
+    */
+    fun setColorPaletteFromImage(colors: Map<String,String>) {
+        _colorPalette.value = colors
+    }
+    
     /*
     * Update the generation mode
     */
