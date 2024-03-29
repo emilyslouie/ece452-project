@@ -16,16 +16,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -40,9 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -74,7 +64,6 @@ fun GenerateWithImageScreen(
     val paletteViewModel =
         ViewModelProvider(context as ViewModelStoreOwner).get(PaletteViewModel::class.java)
 
-//    val colors = remember { mutableStateListOf(0xFFfff7b2, 0xFFccf865, 0xFF49cc6e, 0xFF9b7367, 0xFF775798)};
     val colors = remember { mutableStateListOf<String>()}
     val moreColors = remember { mutableStateListOf<String>()}
 
@@ -82,7 +71,6 @@ fun GenerateWithImageScreen(
 
     var launchedEffectTriggered by remember { mutableStateOf(false) }
 
-//    val imageUrl by generatorViewModel.imageUrl// find what the image url is
     val imageUrl = uploadedImageUri.toString()
 
     var selectedOption by remember {
@@ -155,15 +143,10 @@ fun GenerateWithImageScreen(
                                 onSelectionChange(color)
                             }
                             .background(Color(GraphicsColor.parseColor(color)))
-//                            .padding(
-//                                vertical = 1.dp,
-//                                horizontal = 1.dp,
-//                            )
                             .border(
                                 if (color == selectedOption) {
                                     BorderStroke(1.5.dp, Color.DarkGray)
                                 } else {
-//                                    BorderStroke(1.dp, Color.Gray)
                                     BorderStroke(0.dp, Color.White)
                                 }
                             )
