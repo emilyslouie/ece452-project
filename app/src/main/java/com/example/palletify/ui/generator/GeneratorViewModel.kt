@@ -1,15 +1,9 @@
 package com.example.palletify.ui.generator
 
-import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.drawable.BitmapDrawable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import coil.ImageLoader
-import coil.request.ImageRequest
-import coil.request.SuccessResult
 import com.example.palletify.data.GenerationMode
 import com.example.palletify.data.Palette
 import com.example.palletify.data.TrademarkedColor
@@ -150,6 +144,16 @@ class GeneratorViewModel : ViewModel() {
         }
     }
 
+    private fun getColorMatchingPalette(mainColor: Palette.Color): Palette.Color {
+        val newColor = fetchPalette(
+            mutableSetOf(mainColor),
+            1,
+            currentPalette.mode
+        )[0];
+
+        return newColor;
+    }
+
     /*
     * Handle undo to go back to the previous palette
     */
@@ -191,29 +195,23 @@ class GeneratorViewModel : ViewModel() {
     * Handle increase number of colors shown in the palette
     */
     fun handleIncreaseNumOfColors(seed: Palette.Color) {
-        if (currentPalette.numberOfColours < MAX_NUMBER_OF_COLORS) {
-            currentPalette.numberOfColours++;
-            val newColors = listOf<Palette.Color>(
-                Palette.Color(
-                    Palette.Hex("#FFFFFF", "FFFFFF"),
-                    Palette.Rgb(
-                        255,
-                        255,
-                        255,
-                    ),
-                    Palette.Name("white")
-                )
-            );
-            val indexToAddNewColor = currentPalette.colors.indexOf(seed) + 1;
-            currentPalette.colors.add(indexToAddNewColor, newColors[0]);
-            val newPalette = currentPalette.colors.toMutableList();
-            _uiState.update { currentState ->
-                currentState.copy(
-                    numberOfColours = currentPalette.numberOfColours,
-                    currentPalette = newPalette
-                )
+        thread {
+            if (currentPalette.numberOfColours < MAX_NUMBER_OF_COLORS) {
+                val newCount = currentPalette.numberOfColours + 1;
+                currentPalette.numberOfColours = newCount;
+                val newColor = getColorMatchingPalette(seed);
+                val indexToAddNewColor = currentPalette.colors.indexOf(seed) + 1;
+                currentPalette.colors.add(indexToAddNewColor, newColor);
+                val newPalette = currentPalette.colors.toMutableList();
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        numberOfColours = newCount,
+                        currentPalette = newPalette
+                    )
+                }
             }
         }
+
     }
 
     /*
@@ -221,12 +219,13 @@ class GeneratorViewModel : ViewModel() {
     */
     fun handleDecreaseNumOfColors(color: Palette.Color) {
         if (currentPalette.numberOfColours > MIN_NUMBER_OF_COLORS) {
-            currentPalette.numberOfColours--;
+            val newCount = currentPalette.numberOfColours - 1;
+            currentPalette.numberOfColours = newCount
             currentPalette.colors.remove(color);
             val newPalette = currentPalette.colors.toMutableList();
             _uiState.update { currentState ->
                 currentState.copy(
-                    numberOfColours = currentPalette.numberOfColours,
+                    numberOfColours = newCount,
                     currentPalette = newPalette
                 )
             }
@@ -268,14 +267,14 @@ class GeneratorViewModel : ViewModel() {
             );
         }
     }
-    
+
     /*
     * Set colors in color palette based off an image
     */
-    fun setColorPaletteFromImage(colors: Map<String,String>) {
+    fun setColorPaletteFromImage(colors: Map<String, String>) {
         _colorPalette.value = colors
     }
-    
+
     /*
     * Update the generation mode
     */

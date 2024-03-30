@@ -151,9 +151,15 @@ fun generateComplementaryPalette(
     count: Int
 ): MutableList<Palette.Color> {
     val rgbColors: MutableList<Array<Int>> = mutableListOf();
+
+    // get the opposite colour of each of the seeds
     for (color in seeds) {
         val rgb = color.rgb;
-        rgbColors.add(arrayOf(rgb.r, rgb.g, rgb.b))
+        // if the count is 1, we don't want to add the seed because it's already in the palette
+        // since the count is only 1 when we want to add a new colour
+        if (count > 1) {
+            rgbColors.add(arrayOf(rgb.r, rgb.g, rgb.b))
+        }
         val complementaryRgb = arrayOf(255 - rgb.r, 255 - rgb.g, 255 - rgb.b);
         rgbColors.add(complementaryRgb);
     }
@@ -194,7 +200,8 @@ fun generateAnalogicPalette(
     }
 
     var hslSeed = 0;
-    var currentCount = rgbColors.size;
+    // if the count is 1, then we still want to generate colours
+    var currentCount = if (count == 1) 0 else rgbColors.size;
     while (currentCount < count) {
         val hsl = rgbToHsl(rgbColors[hslSeed]);
         val newHueValues = getAnalogousHue(hsl[0], Random.nextDouble(0.05, 0.15));
@@ -208,7 +215,11 @@ fun generateAnalogicPalette(
 
     val result: MutableList<Palette.Color> = mutableListOf();
     for (color in 0..<count) {
-        val currColor = rgbColors[color];
+        var currColor = rgbColors[color];
+        // if the count is 1, then we want to get the first colour that is not the seed
+        if (count == 1) {
+            currColor = rgbColors[1];
+        }
         val rgb = Palette.Rgb(currColor[0], currColor[1], currColor[2]);
         val hexValue = rgbToHex(currColor);
         val hex = Palette.Hex("#$hexValue", hexValue);
@@ -278,7 +289,11 @@ fun generateRandomPalette(
     count: Int
 ): MutableList<Palette.Color> {
     val result: MutableList<Palette.Color> = seeds.toMutableList();
-    result.addAll(fetchRandomColors(count - seeds.size));
+    val numOfColors = if (count == 1) 1 else count - seeds.size;
+    if (count == 1) {
+        result.clear();
+    }
+    result.addAll(fetchRandomColors(numOfColors));
     return result;
 }
 
