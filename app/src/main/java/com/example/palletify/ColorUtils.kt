@@ -2,7 +2,6 @@ package com.example.palletify
 
 import androidx.compose.ui.graphics.Color
 import androidx.core.graphics.toColorInt
-import com.example.palletify.data.Palette
 import java.lang.Integer.parseInt
 import kotlin.math.max
 import kotlin.math.min
@@ -11,8 +10,8 @@ import kotlin.math.roundToInt
 import kotlin.random.Random
 
 object ColorUtils {
-    fun hexToComposeColor(hex: Palette.Hex): Color {
-        return Color(hex.value.toColorInt());
+    fun hexToComposeColor(hex: String): Color {
+        return Color(android.graphics.Color.parseColor(hex));
     }
 
     fun contrastRatio(foregroundColor: Color, backgroundColor: Color): Double {

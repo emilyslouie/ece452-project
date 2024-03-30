@@ -446,14 +446,14 @@ fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
             TopAppBar(
                 title = { Text("Preview", color = Color.White) },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = hexToComposeColor(previewUiState.currentColor.hex)
+                    containerColor = hexToComposeColor(previewUiState.currentColor)
                 )
             )
         },
         bottomBar = {
             BottomAppBar(
                 actions = {
-                    previewUiState.colors.forEach { color ->
+                    previewUiState.palette.forEach { color ->
                         Button(
                             onClick = {
                                 previewViewModel.setCurrentColor(color)
@@ -464,7 +464,7 @@ fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
                             shape = CircleShape,
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = hexToComposeColor(
-                                    color.hex
+                                    color
                                 )
                             )
                         ) {}
@@ -533,7 +533,7 @@ fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
             }
             AccessibleComponentWrapper(
                 foregroundColor = Color.White,
-                backgroundColor = hexToComposeColor(previewUiState.currentColor.hex)
+                backgroundColor = hexToComposeColor(previewUiState.currentColor)
             ) {
                 Button(
                     modifier = Modifier
@@ -543,7 +543,7 @@ fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
                     onClick = { /* No action is triggered */ },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = hexToComposeColor(
-                            previewUiState.currentColor.hex
+                            previewUiState.currentColor
                         )
                     )
                 ) {
@@ -552,26 +552,26 @@ fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
                 }
             }
             AccessibleComponentWrapper(
-                foregroundColor = hexToComposeColor(previewUiState.currentColor.hex),
+                foregroundColor = hexToComposeColor(previewUiState.currentColor),
                 backgroundColor = Color.White
-            ) { RadioButtonGroup(hexToComposeColor(previewUiState.currentColor.hex)) }
+            ) { RadioButtonGroup(hexToComposeColor(previewUiState.currentColor)) }
 
             AccessibleComponentWrapper(
-                foregroundColor = hexToComposeColor(previewUiState.currentColor.hex),
+                foregroundColor = hexToComposeColor(previewUiState.currentColor),
                 backgroundColor = MaterialTheme.colorScheme.surface
             ) {
                 ProfileCard(
                     profileImagePainter = imagePainter,
                     primaryText = "John Preview Doe",
                     secondaryText = "Software Engineer at Palletify Corp",
-                    color = hexToComposeColor(previewUiState.currentColor.hex)
+                    color = hexToComposeColor(previewUiState.currentColor)
                 )
             }
             AccessibleComponentWrapper(
-                foregroundColor = hexToComposeColor(previewUiState.currentColor.hex),
+                foregroundColor = hexToComposeColor(previewUiState.currentColor),
                 backgroundColor = MaterialTheme.colorScheme.surface
             ) {
-                GraphCard(hexToComposeColor(previewUiState.currentColor.hex))
+                GraphCard(hexToComposeColor(previewUiState.currentColor))
             }
         }
     }

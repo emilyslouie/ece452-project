@@ -7,10 +7,7 @@ import com.example.palletify.data.Palette.Hex
  * Data class that represents the preview's UI state
  */
 data class PreviewUiState(
-    val colors: MutableList<Palette.Color> = mutableListOf(),
-    val currentColor: Palette.Color = Palette.Color(
-        Hex("#FFFFFF", "FFFFFF"),
-        Palette.Rgb(255, 255, 255),
-        Palette.Name("white")
-    )
+    var paletteID: Int = 0,
+    var palette: List<String> = listOf<String>(),
+    val currentColor: String = "#FFFFFF"
 )

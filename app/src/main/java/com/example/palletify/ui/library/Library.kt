@@ -46,13 +46,21 @@ import android.content.ContentValues
 import android.content.Context
 import android.provider.MediaStore
 import androidx.compose.foundation.shape.RoundedCornerShape
-
+import androidx.navigation.NavController
+import com.example.palletify.Screens
+import com.example.palletify.ui.preview.PreviewViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStoreOwner
+import androidx.compose.ui.platform.LocalContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Library(context: Context) {
-    val palletViewModel: PaletteViewModel = viewModel()
-    val allPalletsState = palletViewModel.getAllPalettes.collectAsState()
+fun Library(context: Context, navigationController: NavController) {
+    val palleteViewModel: PaletteViewModel = viewModel()
+    val previewViewModel =
+        ViewModelProvider(LocalContext.current as ViewModelStoreOwner).get(PreviewViewModel::class.java)
+
+    val allPalletsState = palleteViewModel.getAllPalettes.collectAsState()
 
     var selectedPalette: Palette? by remember { mutableStateOf(null) }
     var showExportDialog by remember { mutableStateOf(false) }
@@ -69,7 +77,7 @@ fun Library(context: Context) {
                 val state = rememberSwipeToDismissBoxState(
                     confirmValueChange = {
                         if (it == SwipeToDismissBoxValue.EndToStart) {
-                            palletViewModel.deletePalette(palette)
+                            palleteViewModel.deletePalette(palette)
                         }
                         true
                     }
@@ -97,7 +105,7 @@ fun Library(context: Context) {
                     }
 
                 ) {
-                    PaletteItem(palette = palette)
+                    PaletteItem(palette = palette, navigationController, previewViewModel)
                 }
             }
         }
@@ -215,7 +223,7 @@ fun showToast(message: String, context: Context) {
 }
 
 @Composable
-fun PaletteItem(palette: Palette) {
+fun PaletteItem(palette: Palette, navigationController: NavController, previewViewModel: PreviewViewModel) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -232,7 +240,13 @@ fun PaletteItem(palette: Palette) {
 
             Row(
                 modifier = Modifier
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .clickable {
+                        previewViewModel.setCurrentPaletteID(palette.id)
+                        palette.colors?.let { previewViewModel.setCurrentPalette(it) }
+                        previewViewModel.setCurrentColor(palette.colors?.get(0) ?: "#FFFFFF")
+                        navigationController.navigate(Screens.PreviewScreen.screen)
+                    },
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
