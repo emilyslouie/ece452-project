@@ -49,6 +49,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.palletify.ui.generator.GenerateWithImageScreen
 import com.example.palletify.ui.image.createImageFile
 import com.example.palletify.ui.preview.PreviewViewModel
+import com.example.palletify.ui.this_or_that.ThisOrThatScreen
 import java.util.Objects
 
 class MainActivity : ComponentActivity() {
@@ -187,6 +188,16 @@ fun NavDrawer() {
                             popUpTo(0)
                         }
                     })
+                NavigationDrawerItem(label = { Text(text = "This or That") },
+                    selected = false,
+                    onClick = {
+                        coroutineScope.launch {
+                            drawerState.close()
+                        }
+                        navigationController.navigate(Screens.ThisOrThatScreen.screen) {
+                            popUpTo(0)
+                        }
+                    })
             }
         },
     ) {
@@ -230,6 +241,7 @@ fun NavDrawer() {
                 composable(Screens.Library.screen) { Library(context, navigationController) }
                 composable(Screens.PreviewScreen.screen) { PreviewScreen(previewViewModel) }
                 composable(Screens.GenerateScreen.screen) { GeneratorScreen() }
+                composable(Screens.ThisOrThatScreen.screen) { ThisOrThatScreen() }
             }
         }
     }

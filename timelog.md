@@ -28,3 +28,4 @@
 | 03/28/2024 |      |          | 8     |             |        |      | Add gradient colour generator mode                                 |
 | 03/29/2024 |      |          | 8     |             |        |      | Create list of trademarked colours and warn user if used           |
 | 03/29/2024 |      |          | 5     |             |        |      | When adding new colours, generate it using our algorithms          |
+| 03/30/2024 |      |          | 4     |             |        |      | Begin scaffolding for This Or That generator                       |
