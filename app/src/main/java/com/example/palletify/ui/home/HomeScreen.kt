@@ -169,15 +169,6 @@ fun HomeScreen(navigationController: NavController) {
             ) {
                 Text("Randomly generate colours")
             }
-//            Button(
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .padding(start = 28.dp, end = 28.dp)
-//                    .heightIn(min = 55.dp),
-//                onClick = { /* No action is triggered */ }
-//            ) {
-//                Text("Customize your own palette")
-//            }
         }
     }
 
