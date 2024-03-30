@@ -73,30 +73,14 @@ import androidx.compose.ui.window.Dialog
 import com.example.palletify.ColorUtils
 import com.example.palletify.database.PaletteViewModel
 
-fun Palette.Color.toComposeColor(): Color {
-    // Parse the hex string to a Long and create a Color
-    return Color(android.graphics.Color.parseColor(this.hex.value))
-}
-
 fun Color.toPaletteColor(): String {
     // Convert the floating-point values to 0-255 and then to a hex string
     val redValue = (this.red * 255).toInt()
     val greenValue = (this.green * 255).toInt()
     val blueValue = (this.blue * 255).toInt()
     val alphaValue = (this.alpha * 255).toInt()
-//
-//    // Format the ARGB components to a hex string, including the alpha channel
-    val hexValue = String.format("#%02X%02X%02X%02X", alphaValue, redValue, greenValue, blueValue)
-    return hexValue
-//    val cleanHexValue = hexValue.substring(1)
-//
-//    val namePlaceholder = "Color-$cleanHexValue"
-//
-//    return Palette.Color(
-//        hex = Palette.Hex(hexValue, cleanHexValue),
-//        rgb = Palette.Rgb(redValue, greenValue, blueValue),
-//        name = Palette.Name(namePlaceholder)
-//    )
+
+    return String.format("#%02X%02X%02X%02X", alphaValue, redValue, greenValue, blueValue)
 }
 
 @Composable
@@ -437,12 +421,6 @@ fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
     val showContrastModal = remember { mutableStateOf(false) }
     val controller = rememberColorPickerController()
     val palleteViewModel: PaletteViewModel = viewModel()
-    val whitePaletteColor = Palette.Color(
-        hex = Palette.Hex("#FFFFFF", "FFFFFF"),
-        rgb = Palette.Rgb(255, 255, 255),
-        name = Palette.Name("White")
-    )
-    val selectedColor = remember { mutableStateOf(previewUiState.currentColor ?: whitePaletteColor) }
 
     Scaffold(
         topBar = {
