@@ -37,4 +37,11 @@ class PaletteViewModel(application: Application) : AndroidViewModel(application)
             repository.deletePalette(palette)
         }
     }
+
+    fun updatePaletteColorsById(id: Int, newColors: List<String>) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.updateColorsById(id, newColors)
+        }
+    }
+
 }

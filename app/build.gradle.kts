@@ -93,6 +93,10 @@ dependencies {
     // Coil
     implementation("io.coil-kt:coil-compose:1.4.0")
 
+    // Color Picker
+    implementation("com.github.skydoves:colorpicker-compose:1.0.7")
+    implementation("androidx.appcompat:appcompat:1.4.1")
+
     // palette
     implementation("androidx.palette:palette-ktx:1.0.0")
 
