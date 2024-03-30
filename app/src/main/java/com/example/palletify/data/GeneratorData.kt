@@ -125,6 +125,19 @@ data class PaletteResponseBody(
     val colors: MutableList<Palette.Color>,
 )
 
+fun getColorMatchingPalette(
+    mainColor: Palette.Color,
+    mode: GenerationMode
+): Palette.Color {
+    val newColor = fetchPalette(
+        mutableSetOf(mainColor),
+        1,
+        mode
+    )[0];
+
+    return newColor;
+}
+
 
 fun fetchPalette(
     seeds: MutableSet<Palette.Color>,

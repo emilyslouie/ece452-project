@@ -9,6 +9,7 @@ import com.example.palletify.data.Palette
 import com.example.palletify.data.TrademarkedColor
 import com.example.palletify.data.fetchPalette
 import com.example.palletify.data.fetchRandomColors
+import com.example.palletify.data.getColorMatchingPalette
 import com.example.palletify.data.getRandomGenerationMode
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -144,15 +145,6 @@ class GeneratorViewModel : ViewModel() {
         }
     }
 
-    private fun getColorMatchingPalette(mainColor: Palette.Color): Palette.Color {
-        val newColor = fetchPalette(
-            mutableSetOf(mainColor),
-            1,
-            currentPalette.mode
-        )[0];
-
-        return newColor;
-    }
 
     /*
     * Handle undo to go back to the previous palette
@@ -199,7 +191,7 @@ class GeneratorViewModel : ViewModel() {
             if (currentPalette.numberOfColours < MAX_NUMBER_OF_COLORS) {
                 val newCount = currentPalette.numberOfColours + 1;
                 currentPalette.numberOfColours = newCount;
-                val newColor = getColorMatchingPalette(seed);
+                val newColor = getColorMatchingPalette(seed, currentPalette.mode);
                 val indexToAddNewColor = currentPalette.colors.indexOf(seed) + 1;
                 currentPalette.colors.add(indexToAddNewColor, newColor);
                 val newPalette = currentPalette.colors.toMutableList();
