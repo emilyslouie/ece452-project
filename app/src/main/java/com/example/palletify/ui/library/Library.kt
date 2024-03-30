@@ -49,13 +49,22 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.toArgb
 import androidx.navigation.NavHostController
+import androidx.navigation.NavController
+import com.example.palletify.Screens
+import com.example.palletify.ui.preview.PreviewViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStoreOwner
+import androidx.compose.ui.platform.LocalContext
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Library(context: Context, navigationController: NavHostController) {
-    val palletViewModel: PaletteViewModel = viewModel()
-    val allPalletsState = palletViewModel.getAllPalettes.collectAsState()
+fun Library(context: Context, navigationController: NavController) {
+    val palleteViewModel: PaletteViewModel = viewModel()
+    val previewViewModel =
+        ViewModelProvider(LocalContext.current as ViewModelStoreOwner).get(PreviewViewModel::class.java)
+
+    val allPalletsState = palleteViewModel.getAllPalettes.collectAsState()
 
     var selectedPalette: Palette? by remember { mutableStateOf(null) }
     var showExportDialog by remember { mutableStateOf(false) }
@@ -72,7 +81,7 @@ fun Library(context: Context, navigationController: NavHostController) {
                 val state = rememberSwipeToDismissBoxState(
                     confirmValueChange = {
                         if (it == SwipeToDismissBoxValue.EndToStart) {
-                            palletViewModel.deletePalette(palette)
+                            palleteViewModel.deletePalette(palette)
                             Toast.makeText(context, "Palette successfully deleted", Toast.LENGTH_SHORT).show()
                         }
                         it != SwipeToDismissBoxValue.StartToEnd
@@ -102,7 +111,7 @@ fun Library(context: Context, navigationController: NavHostController) {
                     }
 
                 ) {
-                    PaletteItem(palette = palette)
+                    PaletteItem(palette = palette, navigationController, previewViewModel)
                 }
             }
         }
@@ -290,7 +299,7 @@ fun showToast(message: String, context: Context) {
 }
 
 @Composable
-fun PaletteItem(palette: Palette) {
+fun PaletteItem(palette: Palette, navigationController: NavController, previewViewModel: PreviewViewModel) {
     Surface(
         modifier = Modifier
             .padding(horizontal = 8.dp)
@@ -307,9 +316,13 @@ fun PaletteItem(palette: Palette) {
 
             Row(
                 modifier = Modifier
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .fillMaxWidth()
+                    .clickable {
+                        previewViewModel.setCurrentPaletteID(palette.id)
+                        palette.colors?.let { previewViewModel.setCurrentPalette(it) }
+                        previewViewModel.setCurrentColor(palette.colors?.get(0) ?: "#FFFFFF")
+                        navigationController.navigate(Screens.PreviewScreen.screen)
+                    },
             ) {
                 palette.colors?.forEach { color ->
                     val hexCode = generateHexCode(color)
@@ -338,7 +351,7 @@ fun ColorBoxWithHex(color: String, hexCode: String) {
             text = hexCode,
             fontSize = 12.sp,
             modifier = Modifier.padding(top = 4.dp),
-            color = Color.Black 
+            color = Color.Black
         )
     }
 }
