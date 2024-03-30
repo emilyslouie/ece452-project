@@ -13,5 +13,9 @@ class PaletteInterface(private val paletteDao: PaletteDao) {
     suspend fun deletePalette(palette: Palette) {
         paletteDao.deletePalette(palette)
     }
+
+    suspend fun updateColorsById(id: Int, colors: List<String>) {
+        paletteDao.updateColorsById(id, colors)
+    }
 }
 

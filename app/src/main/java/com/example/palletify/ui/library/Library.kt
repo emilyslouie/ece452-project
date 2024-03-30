@@ -45,13 +45,17 @@ import androidx.compose.material3.AlertDialog
 import android.content.ContentValues
 import android.content.Context
 import android.provider.MediaStore
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.toArgb
+import androidx.navigation.NavHostController
 import androidx.navigation.NavController
 import com.example.palletify.Screens
 import com.example.palletify.ui.preview.PreviewViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.compose.ui.platform.LocalContext
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -78,8 +82,9 @@ fun Library(context: Context, navigationController: NavController) {
                     confirmValueChange = {
                         if (it == SwipeToDismissBoxValue.EndToStart) {
                             palleteViewModel.deletePalette(palette)
+                            Toast.makeText(context, "Palette successfully deleted", Toast.LENGTH_SHORT).show()
                         }
-                        true
+                        it != SwipeToDismissBoxValue.StartToEnd
                     }
                 )
                 SwipeToDismissBox(
@@ -91,7 +96,8 @@ fun Library(context: Context, navigationController: NavController) {
                         }
 
                         Box(
-                            modifier = Modifier.fillMaxSize()
+                            modifier = Modifier
+                                .fillMaxSize()
                                 .background(color),
                             contentAlignment = Alignment.CenterEnd
 
@@ -99,7 +105,7 @@ fun Library(context: Context, navigationController: NavController) {
                             Icon(
                                 imageVector = Icons.Filled.Delete,
                                 contentDescription = "Delete",
-                                modifier = Modifier.padding(end = 16.dp),
+                                modifier = Modifier.padding(end = 16.dp, top = 16.dp),
                             )
                         }
                     }
@@ -144,7 +150,7 @@ fun Library(context: Context, navigationController: NavController) {
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 // Display palette ID
-                                Text(text = "Palette ID: ${palette.id}", fontSize = 18.sp)
+                                Text(text = "Palette ${palette.id}", fontSize = 18.sp)
 
                             }
                         }
@@ -155,9 +161,11 @@ fun Library(context: Context, navigationController: NavController) {
                         onClick = {
                             if (selectedPalette != null) {
                                 val bitmap = generateImageForPalette(selectedPalette!!)
+                                val listofhexcodes = generateListOfHexcodes(selectedPalette!!)
                                 val title = "Palette_Image"
                                 val description = "Image generated from palette"
-                                saveImageToDevice(context, bitmap, title, description)
+
+                                saveImageToDevice(context, bitmap, title, description, listofhexcodes)
                                 showExportDialog = false
                                 selectedPalette = null
                             }
@@ -181,7 +189,7 @@ fun Library(context: Context, navigationController: NavController) {
 
 fun generateImageForPalette(palette: Palette): Bitmap {
     val imageSize = 400
-    val cellSize = imageSize / 5 // TODO: hardcoded right now, change
+    val cellSize = imageSize / palette.numberOfColors!!
 
     val bitmap = Bitmap.createBitmap(imageSize, imageSize, Bitmap.Config.ARGB_8888)
     val canvas = Canvas(bitmap)
@@ -196,13 +204,36 @@ fun generateImageForPalette(palette: Palette): Bitmap {
             (index + 1) * cellSize.toFloat(), imageSize.toFloat(),
             paint
         )
+
     }
 
     return bitmap
 }
-fun saveImageToDevice(context: Context, bitmap: Bitmap, title: String, description: String) {
+
+fun generateListOfHexcodes(palette: Palette): List<String> {
+    val colors = palette.colors.orEmpty()
+    val hexCodes = mutableListOf<String>()
+
+    colors.forEach { color ->
+        val hexCode = String.format("#%06X", (0xFFFFFF and android.graphics.Color.parseColor(color)))
+        hexCodes.add(hexCode)
+    }
+
+    return hexCodes
+}
+
+fun saveImageToDevice(
+    context: Context,
+    bitmap: Bitmap,
+    title: String,
+    description: String,
+    hexCodes: List<String>
+): Boolean {
+    val timeStamp = System.currentTimeMillis()
+    val imageFileName = "${title}_$timeStamp.jpg"
+
     val contentValues = ContentValues().apply {
-        put(MediaStore.Images.Media.DISPLAY_NAME, title)
+        put(MediaStore.Images.Media.DISPLAY_NAME, imageFileName)
         put(MediaStore.Images.Media.DESCRIPTION, description)
         put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
     }
@@ -210,10 +241,55 @@ fun saveImageToDevice(context: Context, bitmap: Bitmap, title: String, descripti
     val resolver = context.contentResolver
     val imageUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
 
-    imageUri?.let { uri ->
-        resolver.openOutputStream(uri)?.use { outputStream ->
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
+    return if (imageUri != null) {
+        try {
+            resolver.openOutputStream(imageUri)?.use { outputStream ->
+                val newBitmap = Bitmap.createBitmap(bitmap.width, bitmap.height + 20, Bitmap.Config.ARGB_8888)
+                val canvas = Canvas(newBitmap)
+
+                canvas.drawBitmap(bitmap, 0f, 0f, null)
+
+                val paint = Paint().apply {
+                    color = android.graphics.Color.BLACK
+                    textSize = 16f
+                    textAlign = Paint.Align.CENTER
+                }
+                val cellSize = bitmap.width / hexCodes.size
+                hexCodes.forEachIndexed { index, hexCode ->
+                    paint.color = android.graphics.Color.LTGRAY
+                    canvas.drawRect(
+                        (index * cellSize).toFloat(),
+                        bitmap.height.toFloat(),
+                        ((index + 1) * cellSize).toFloat(),
+                        bitmap.height + 20f,
+                        paint
+                    )
+
+                    paint.color = android.graphics.Color.BLACK
+                    canvas.drawText(
+                        hexCode,
+                        (index * cellSize + cellSize / 2).toFloat(),
+                        bitmap.height + 20f - 5,
+                        paint
+                    )
+                }
+
+                if (newBitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)) {
+                    Toast.makeText(context, "Palette exported successfully", Toast.LENGTH_SHORT).show()
+                    true // Image saved successfully
+                } else {
+                    Toast.makeText(context, "Failed to export palette", Toast.LENGTH_SHORT).show()
+                    false // Failed to save image
+                }
+            } ?: false
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(context, "Failed to export palette", Toast.LENGTH_SHORT).show()
+            false // Error occurred while saving image
         }
+    } else {
+        Toast.makeText(context, "Failed to export palette", Toast.LENGTH_SHORT).show()
+        false // URI is null
     }
 }
 
@@ -226,8 +302,8 @@ fun showToast(message: String, context: Context) {
 fun PaletteItem(palette: Palette, navigationController: NavController, previewViewModel: PreviewViewModel) {
     Surface(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
+            .padding(horizontal = 8.dp)
+            .fillMaxWidth(),
         color = MaterialTheme.colorScheme.background
     ) {
         Column(
@@ -236,7 +312,7 @@ fun PaletteItem(palette: Palette, navigationController: NavController, previewVi
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            Text(text = "Palette ID: ${palette.id}", fontSize = 18.sp)
+            Text(text = "Palette ${palette.id}", fontSize = 18.sp)
 
             Row(
                 modifier = Modifier
@@ -247,11 +323,10 @@ fun PaletteItem(palette: Palette, navigationController: NavController, previewVi
                         previewViewModel.setCurrentColor(palette.colors?.get(0) ?: "#FFFFFF")
                         navigationController.navigate(Screens.PreviewScreen.screen)
                     },
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
             ) {
                 palette.colors?.forEach { color ->
-                    ColorBox(color = color)
+                    val hexCode = generateHexCode(color)
+                    ColorBoxWithHex(color = color, hexCode = hexCode)
                 }
             }
         }
@@ -259,14 +334,27 @@ fun PaletteItem(palette: Palette, navigationController: NavController, previewVi
     }
 }
 
+fun generateHexCode(color: String): String {
+    return String.format("#%06X", (0xFFFFFF and android.graphics.Color.parseColor(color)))
+}
+
 
 @Composable
-fun ColorBox(color: String) {
-    Box(
-        modifier = Modifier
-            .size(60.dp)
-            .background(color = Color(android.graphics.Color.parseColor(color)))
-    )
+fun ColorBoxWithHex(color: String, hexCode: String) {
+    Column {
+        Box(
+            modifier = Modifier
+                .size(60.dp)
+                .background(color = Color(android.graphics.Color.parseColor(color)))
+        )
+        Text(
+            text = hexCode,
+            fontSize = 12.sp,
+            modifier = Modifier.padding(top = 4.dp),
+            color = Color.Black
+        )
+    }
 }
+
 
 

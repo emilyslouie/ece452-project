@@ -60,6 +60,28 @@ import com.example.palletify.ColorUtils.hexToComposeColor
 import com.example.palletify.R
 import com.example.palletify.ui.theme.PalletifyTheme
 import kotlin.random.Random
+import android.util.Log
+import androidx.compose.foundation.horizontalScroll
+import com.github.skydoves.colorpicker.compose.HsvColorPicker
+import com.github.skydoves.colorpicker.compose.AlphaSlider
+import com.github.skydoves.colorpicker.compose.BrightnessSlider
+import com.github.skydoves.colorpicker.compose.rememberColorPickerController
+import com.github.skydoves.colorpicker.compose.ColorPickerController
+import com.github.skydoves.colorpicker.compose.AlphaTile
+import com.example.palletify.data.Palette
+import androidx.compose.ui.window.Dialog
+import com.example.palletify.ColorUtils
+import com.example.palletify.database.PaletteViewModel
+
+fun Color.toPaletteColor(): String {
+    // Convert the floating-point values to 0-255 and then to a hex string
+    val redValue = (this.red * 255).toInt()
+    val greenValue = (this.green * 255).toInt()
+    val blueValue = (this.blue * 255).toInt()
+    val alphaValue = (this.alpha * 255).toInt()
+
+    return String.format("#%02X%02X%02X%02X", alphaValue, redValue, greenValue, blueValue)
+}
 
 @Composable
 fun OutlinedRadioButtonWithText(
@@ -226,6 +248,169 @@ fun RadioButtonGroup(
     }
 }
 
+@Composable
+fun ColorPickerDialog(
+    controller: ColorPickerController,
+    onDismissRequest: () -> Unit,
+    initialColor: Color,
+    onColorChanged: (Color) -> Unit,
+    onSave: (Color) -> Unit
+) {
+    Dialog(onDismissRequest = onDismissRequest) {
+        Card {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                HsvColorPicker(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 300.dp)
+                        .padding(10.dp),
+                    controller = controller,
+                    initialColor = initialColor
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                AlphaSlider(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp)
+                        .height(35.dp),
+                    controller = controller,
+                    initialColor = initialColor
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                BrightnessSlider(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp)
+                        .height(35.dp),
+                    controller = controller,
+                    initialColor = initialColor
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                AlphaTile(
+                    modifier = Modifier
+                        .size(80.dp),
+                    controller = controller
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    Button(
+                        onClick = onDismissRequest,
+                        modifier = Modifier.padding(end = 8.dp)
+                    ) {
+                        Text("Cancel")
+                    }
+                    Button(
+                        onClick = {
+                            val c = controller.selectedColor
+                            onSave(c.value)
+                            onDismissRequest()
+                        }
+                    ) {
+                        Text("Save")
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ContrastColorPickerDialog(
+    palette: List<String>,
+    onDismissRequest: () -> Unit,
+    firstColor: String
+) {
+    val contrastResult = remember { mutableStateOf<String?>(null) }
+
+    Dialog(onDismissRequest = onDismissRequest) {
+        Card {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Row(
+                    modifier=Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start
+                ) {
+                    Text("Color One: ", modifier = Modifier.padding(8.dp), style=TextStyle(fontSize =24.sp))
+                    ColorSample(color=firstColor, onClick={})
+                }
+
+                Text("Select Contrast Color", style = TextStyle(
+                    fontSize = 24.sp,
+                    textAlign = TextAlign.Center
+                ),)
+                Row(
+                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    palette.forEach { color ->
+                        ColorSample(color = color, onClick={
+                            val contrastRatio = ColorUtils.contrastRatio(
+                                hexToComposeColor(firstColor),
+                                hexToComposeColor(color)
+                            )
+                            contrastResult.value = if (contrastRatio > 4.5) {
+                                "Good Contrast (Ratio: %.2f)".format(contrastRatio)
+                            } else {
+                                "Not Enough Contrast (Ratio: %.2f)".format(contrastRatio)
+                            }
+                        })
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                contrastResult.value?.let {
+                    Text(it, style = TextStyle(
+                        fontSize = 24.sp,
+                        textAlign = TextAlign.Center
+                    ),)
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    Button(
+                        onClick = onDismissRequest,
+                        modifier = Modifier.padding(end = 8.dp)
+                    ) {
+                        Text("Close")
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ColorSample(color: String, onClick: () -> Unit) {
+    Button(
+        onClick = onClick,
+        modifier = Modifier
+            .size(48.dp)
+            .padding(8.dp),
+        shape = CircleShape,
+        colors = ButtonDefaults.buttonColors(containerColor = hexToComposeColor(color))
+    ) {}
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -233,6 +418,12 @@ fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
     val previewUiState by previewViewModel.uiState.collectAsStateWithLifecycle()
     val imagePainter = painterResource(id = R.drawable.profile)
     val scrollState = rememberScrollState()
+
+    val showColorPicker = remember { mutableStateOf(false) }
+    val showContrastModal = remember { mutableStateOf(false) }
+    val controller = rememberColorPickerController()
+    val palleteViewModel: PaletteViewModel = viewModel()
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -247,7 +438,9 @@ fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
                 actions = {
                     previewUiState.palette.forEach { color ->
                         Button(
-                            onClick = { previewViewModel.setCurrentColor(color) },
+                            onClick = {
+                                previewViewModel.setCurrentColor(color)
+                            },
                             modifier = Modifier
                                 .size(48.dp)
                                 .padding(8.dp),
@@ -263,6 +456,32 @@ fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
             )
         },
     ) { innerPadding ->
+        if (showColorPicker.value) {
+            ColorPickerDialog(
+                controller = controller,
+                onDismissRequest = { showColorPicker.value = false },
+                onColorChanged = { color ->
+                },
+                initialColor = hexToComposeColor( previewUiState.currentColor),
+                onSave = { color ->
+                    previewViewModel.setCurrentColor(color.toPaletteColor())
+                    val paletteCopy = previewUiState.palette.toList().toMutableList()
+                    val index = paletteCopy.indexOf(previewUiState.currentColor)
+                    if (index != -1 ) {
+                        paletteCopy[index] = color.toPaletteColor()
+                    }
+                    palleteViewModel.updatePaletteColorsById(previewUiState.paletteID, paletteCopy)
+                    previewViewModel.setCurrentPalette(paletteCopy)
+                    showColorPicker.value = false
+                }
+            )
+        }
+        if (showContrastModal.value) {
+            ContrastColorPickerDialog(
+                palette = previewUiState.palette,
+                onDismissRequest = { showContrastModal.value = false },
+                firstColor = previewUiState.currentColor)
+        }
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -274,7 +493,7 @@ fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(28.dp)
+                    .padding(start = 28.dp, top = 28.dp, end = 28.dp)
             ) {
                 Text(
                     text = "Welcome to Palletify Preview!",
@@ -282,8 +501,24 @@ fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
                         fontSize = 24.sp,
                         textAlign = TextAlign.Center
                     ),
-                    modifier = Modifier.fillMaxWidth()
                 )
+            }
+            Row(
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Button(
+                    modifier = Modifier.padding(start=8.dp, top=8.dp, bottom=28.dp),
+                    onClick = { showColorPicker.value = true }
+                ) {
+                    Text("Edit Color")
+                }
+                Button(
+                    modifier = Modifier.padding(start=8.dp, top=8.dp, bottom=28.dp),
+                    onClick = { showContrastModal.value = true }
+                ) {
+                    Text("Contrast with Another Color")
+                }
             }
             AccessibleComponentWrapper(
                 foregroundColor = Color.White,
