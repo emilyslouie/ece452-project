@@ -5,6 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -14,6 +15,9 @@ interface PaletteDao {
 
     @Delete
     suspend fun deletePalette(palette: Palette)
+
+    @Query("UPDATE palette SET colors = :colors WHERE id = :id")
+    suspend fun updateColorsById(id: Int, colors: List<String>)
 
     @Query("SELECT * FROM palette ORDER BY id ASC")
     fun getAllPalettes(): Flow<List<Palette>>

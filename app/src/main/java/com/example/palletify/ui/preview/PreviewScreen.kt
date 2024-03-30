@@ -71,6 +71,7 @@ import com.github.skydoves.colorpicker.compose.AlphaTile
 import com.example.palletify.data.Palette
 import androidx.compose.ui.window.Dialog
 import com.example.palletify.ColorUtils
+import com.example.palletify.database.PaletteViewModel
 
 fun Palette.Color.toComposeColor(): Color {
     // Parse the hex string to a Long and create a Color
@@ -435,6 +436,7 @@ fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
     val showColorPicker = remember { mutableStateOf(false) }
     val showContrastModal = remember { mutableStateOf(false) }
     val controller = rememberColorPickerController()
+    val palleteViewModel: PaletteViewModel = viewModel()
     val whitePaletteColor = Palette.Color(
         hex = Palette.Hex("#FFFFFF", "FFFFFF"),
         rgb = Palette.Rgb(255, 255, 255),
@@ -482,8 +484,14 @@ fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
                 },
                 initialColor = hexToComposeColor( previewUiState.currentColor),
                 onSave = { color ->
-                    Log.d("Color picker", "selected color: ${color}")
                     previewViewModel.setCurrentColor(color.toPaletteColor())
+                    val paletteCopy = previewUiState.palette.toList().toMutableList()
+                    val index = paletteCopy.indexOf(previewUiState.currentColor)
+                    if (index != -1 ) {
+                        paletteCopy[index] = color.toPaletteColor()
+                    }
+                    palleteViewModel.updatePaletteColorsById(previewUiState.paletteID, paletteCopy)
+                    previewViewModel.setCurrentPalette(paletteCopy)
                     showColorPicker.value = false
                 }
             )
