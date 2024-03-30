@@ -41,7 +41,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.palletify.ui.generator.GeneratorScreen
-import com.example.palletify.ui.home.HomeScreen
 import com.example.palletify.ui.library.Library
 import com.example.palletify.ui.preview.PreviewScreen
 import com.example.palletify.ui.theme.PalletifyTheme
