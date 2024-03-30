@@ -113,72 +113,76 @@ fun ThisOrThatScreen(thisOrThatViewModel: ThisOrThatViewModel = viewModel()) {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Row() {
-                        thisOrThatUiState.currentPalettes.forEach { palette ->
-                            Column(
-                                Modifier
-                                    .fillMaxHeight()
-                            ) {
-                                Palette(
-                                    thisOrThatViewModel = thisOrThatViewModel,
-                                    colors = palette.colors,
-                                    numOfColors = palette.numberOfColours,
-                                    heightAvailable = columnHeightDp
-                                )
-                            }
-                        }
+                        if (thisOrThatUiState.currentPalettes.size > 0)
+                            Palettes(thisOrThatViewModel, thisOrThatUiState.currentPalettes, columnHeightDp)
                     }
-
                 }
             }
         }
     }
 }
 
-
 @Composable
-fun Palette(
+fun Palettes(
     thisOrThatViewModel: ThisOrThatViewModel,
-    colors: MutableList<com.example.palletify.data.Palette.Color>,
-    numOfColors: Int,
+    currentPalettes: MutableList<ThisOrThatViewModel.PaletteObj>,
     heightAvailable: Dp
 ) {
-    val heightPerColor = heightAvailable / numOfColors;
-    colors.forEach { color ->
-        ColorInPalette(
-            thisOrThatViewModel,
-            color,
-            heightPerColor
-        )
-    }
 
+    val numOfColors = currentPalettes[0].numberOfColours
+    val heightPerColor = heightAvailable / numOfColors;
+    Column () {
+        for (i in 0..<numOfColors) {
+            ColorsInRow(thisOrThatViewModel, currentPalettes[0].colors[i], currentPalettes[1].colors[i], heightPerColor)
+        }
+    }
 }
 
 @Composable
-fun ColorInPalette(
+fun ColorsInRow(
     thisOrThatViewModel: ThisOrThatViewModel,
-    color: com.example.palletify.data.Palette.Color,
+    firstColor: com.example.palletify.data.Palette.Color,
+    secondColor: com.example.palletify.data.Palette.Color,
     heightPerColor: Dp
 ) {
     val thisOrThatUiState by thisOrThatViewModel.uiState.collectAsStateWithLifecycle()
-    TrademarkComponentWrapper(
-        color = color,
-        list = thisOrThatViewModel.trademarkedColor.hexes,
-        map = thisOrThatViewModel.trademarkedColor.colorsMap
-    ) {
-        Row(
-            modifier = Modifier
-                // TODO: cannot figure out how to make each palette be half of the screen
-                .fillMaxWidth(0.5f)
-                .height(heightPerColor)
-                .background(hexToComposeColor(color.hex.value.toString()))
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
 
+    Row(
+    ) {
+        TrademarkComponentWrapper(
+            color = firstColor,
+            list = thisOrThatViewModel.trademarkedColor.hexes,
+            map = thisOrThatViewModel.trademarkedColor.colorsMap
+        ) {
+            Row(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(0.5f)
+                    .height(heightPerColor)
+                    .background(hexToComposeColor(firstColor.hex.value.toString()))
+                    .padding(16.dp),
+            ) {
+
+            }
+        }
+
+        TrademarkComponentWrapper(
+            color = secondColor,
+            list = thisOrThatViewModel.trademarkedColor.hexes,
+            map = thisOrThatViewModel.trademarkedColor.colorsMap
+        ) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(1f)
+                    .height(heightPerColor)
+                    .background(hexToComposeColor(secondColor.hex.value.toString()))
+                    .padding(16.dp),
+            ) {
+
+            }
         }
     }
-
 }
 
 @Preview(showBackground = true)

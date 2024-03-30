@@ -91,10 +91,10 @@ class ThisOrThatViewModel : ViewModel() {
         val colorToMatch = palette.colors[randomIndex];
 
         val similarColor = getColorMatchingPalette(colorToMatch, mode);
+
         val newPalette = fetchPalette(mutableSetOf(similarColor), 5, mode);
 
-        val indexToReplace =
-            if (paletteToKeep == 0) 1 else 0; // there's probably a better way to do this but i'm tired
+        val indexToReplace = 1 - paletteToKeep
 
         setCurrentPalettes(mutableListOf(PaletteObj(5, newPalette, mode)), indexToReplace)
     }
@@ -130,7 +130,7 @@ class ThisOrThatViewModel : ViewModel() {
             currentPalettes = palettes;
         } else {
             // otherwise get the current palettes and replace the appropriate one
-            val uiPalettes = _uiState.value.currentPalettes;
+            val uiPalettes = _uiState.value.currentPalettes.toMutableList();
             uiPalettes[indexToReplace] = palettes[0];
             _uiState.update { currentState ->
                 currentState.copy(
