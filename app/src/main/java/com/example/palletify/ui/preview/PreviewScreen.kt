@@ -61,6 +61,7 @@ import com.example.palletify.R
 import com.example.palletify.ui.theme.PalletifyTheme
 import kotlin.random.Random
 import android.util.Log
+import androidx.compose.foundation.horizontalScroll
 import com.github.skydoves.colorpicker.compose.HsvColorPicker
 import com.github.skydoves.colorpicker.compose.AlphaSlider
 import com.github.skydoves.colorpicker.compose.BrightnessSlider
@@ -69,6 +70,7 @@ import com.github.skydoves.colorpicker.compose.ColorPickerController
 import com.github.skydoves.colorpicker.compose.AlphaTile
 import com.example.palletify.data.Palette
 import androidx.compose.ui.window.Dialog
+import com.example.palletify.ColorUtils
 
 fun Palette.Color.toComposeColor(): Color {
     // Parse the hex string to a Long and create a Color
@@ -277,7 +279,7 @@ fun ColorPickerDialog(
                 HsvColorPicker(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .heightIn(max = 300.dp) // Adjust height as needed
+                        .heightIn(max = 300.dp)
                         .padding(10.dp),
                     controller = controller,
                     initialColor = initialColor
@@ -326,8 +328,8 @@ fun ColorPickerDialog(
                     Button(
                         onClick = {
                             val c = controller.selectedColor
-                            onSave(c.value) // Save the selected color
-                            onDismissRequest() // Dismiss the dialog
+                            onSave(c.value)
+                            onDismissRequest()
                         }
                     ) {
                         Text("Save")
@@ -338,6 +340,90 @@ fun ColorPickerDialog(
     }
 }
 
+@Composable
+fun ContrastColorPickerDialog(
+    palette: List<Palette.Color>,
+    onDismissRequest: () -> Unit,
+    firstColor: Palette.Color
+) {
+    val contrastResult = remember { mutableStateOf<String?>(null) }
+
+    Dialog(onDismissRequest = onDismissRequest) {
+        Card {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Row(
+                    modifier=Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start
+                ) {
+                    Text("Color One: ", modifier = Modifier.padding(8.dp), style=TextStyle(fontSize =24.sp))
+                    ColorSample(color=firstColor, onClick={})
+                }
+
+                Text("Select Contrast Color", style = TextStyle(
+                    fontSize = 24.sp,
+                    textAlign = TextAlign.Center
+                ),)
+                Row(
+                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    palette.forEach { color ->
+                        ColorSample(color = color, onClick={
+                            val contrastRatio = ColorUtils.contrastRatio(
+                                hexToComposeColor(firstColor.hex),
+                                hexToComposeColor(color.hex)
+                            )
+                            contrastResult.value = if (contrastRatio > 4.5) {
+                                "Good Contrast (Ratio: %.2f)".format(contrastRatio)
+                            } else {
+                                "Not Enough Contrast (Ratio: %.2f)".format(contrastRatio)
+                            }
+                        })
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                contrastResult.value?.let {
+                    Text(it, style = TextStyle(
+                        fontSize = 24.sp,
+                        textAlign = TextAlign.Center
+                    ),)
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    Button(
+                        onClick = onDismissRequest,
+                        modifier = Modifier.padding(end = 8.dp)
+                    ) {
+                        Text("Close")
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ColorSample(color: Palette.Color, onClick: () -> Unit) {
+    Button(
+        onClick = onClick,
+        modifier = Modifier
+            .size(48.dp)
+            .padding(8.dp),
+        shape = CircleShape,
+        colors = ButtonDefaults.buttonColors(containerColor = hexToComposeColor(color.hex))
+    ) {}
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
@@ -346,6 +432,7 @@ fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
     val scrollState = rememberScrollState()
 
     val showColorPicker = remember { mutableStateOf(false) }
+    val showContrastModal = remember { mutableStateOf(false) }
     val controller = rememberColorPickerController()
     val whitePaletteColor = Palette.Color(
         hex = Palette.Hex("#FFFFFF", "FFFFFF"),
@@ -369,9 +456,7 @@ fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
                     previewUiState.colors.forEach { color ->
                         Button(
                             onClick = {
-//                                selectedColor.value = color
                                 previewViewModel.setCurrentColor(color)
-                                showColorPicker.value = true
                             },
                             modifier = Modifier
                                 .size(48.dp)
@@ -402,6 +487,12 @@ fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
                 }
             )
         }
+        if (showContrastModal.value) {
+            ContrastColorPickerDialog(
+                palette = previewUiState.colors,
+                onDismissRequest = { showContrastModal.value = false },
+                firstColor = previewUiState.currentColor)
+        }
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -413,7 +504,7 @@ fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(28.dp)
+                    .padding(start = 28.dp, top = 28.dp, end = 28.dp)
             ) {
                 Text(
                     text = "Welcome to Palletify Preview!",
@@ -421,8 +512,24 @@ fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
                         fontSize = 24.sp,
                         textAlign = TextAlign.Center
                     ),
-                    modifier = Modifier.fillMaxWidth()
                 )
+            }
+            Row(
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Button(
+                    modifier = Modifier.padding(start=8.dp, top=8.dp, bottom=28.dp),
+                    onClick = { showColorPicker.value = true }
+                ) {
+                    Text("Edit Color")
+                }
+                Button(
+                    modifier = Modifier.padding(start=8.dp, top=8.dp, bottom=28.dp),
+                    onClick = { showContrastModal.value = true }
+                ) {
+                    Text("Contrast with Another Color")
+                }
             }
             AccessibleComponentWrapper(
                 foregroundColor = Color.White,
