@@ -77,24 +77,25 @@ fun Palette.Color.toComposeColor(): Color {
     return Color(android.graphics.Color.parseColor(this.hex.value))
 }
 
-fun Color.toPaletteColor(): Palette.Color {
+fun Color.toPaletteColor(): String {
     // Convert the floating-point values to 0-255 and then to a hex string
     val redValue = (this.red * 255).toInt()
     val greenValue = (this.green * 255).toInt()
     val blueValue = (this.blue * 255).toInt()
     val alphaValue = (this.alpha * 255).toInt()
-
-    // Format the ARGB components to a hex string, including the alpha channel
+//
+//    // Format the ARGB components to a hex string, including the alpha channel
     val hexValue = String.format("#%02X%02X%02X%02X", alphaValue, redValue, greenValue, blueValue)
-    val cleanHexValue = hexValue.substring(1)
-
-    val namePlaceholder = "Color-$cleanHexValue"
-    
-    return Palette.Color(
-        hex = Palette.Hex(hexValue, cleanHexValue),
-        rgb = Palette.Rgb(redValue, greenValue, blueValue),
-        name = Palette.Name(namePlaceholder)
-    )
+    return hexValue
+//    val cleanHexValue = hexValue.substring(1)
+//
+//    val namePlaceholder = "Color-$cleanHexValue"
+//
+//    return Palette.Color(
+//        hex = Palette.Hex(hexValue, cleanHexValue),
+//        rgb = Palette.Rgb(redValue, greenValue, blueValue),
+//        name = Palette.Name(namePlaceholder)
+//    )
 }
 
 @Composable
@@ -342,9 +343,9 @@ fun ColorPickerDialog(
 
 @Composable
 fun ContrastColorPickerDialog(
-    palette: List<Palette.Color>,
+    palette: List<String>,
     onDismissRequest: () -> Unit,
-    firstColor: Palette.Color
+    firstColor: String
 ) {
     val contrastResult = remember { mutableStateOf<String?>(null) }
 
@@ -372,8 +373,8 @@ fun ContrastColorPickerDialog(
                     palette.forEach { color ->
                         ColorSample(color = color, onClick={
                             val contrastRatio = ColorUtils.contrastRatio(
-                                hexToComposeColor(firstColor.hex),
-                                hexToComposeColor(color.hex)
+                                hexToComposeColor(firstColor),
+                                hexToComposeColor(color)
                             )
                             contrastResult.value = if (contrastRatio > 4.5) {
                                 "Good Contrast (Ratio: %.2f)".format(contrastRatio)
@@ -413,14 +414,14 @@ fun ContrastColorPickerDialog(
 }
 
 @Composable
-fun ColorSample(color: Palette.Color, onClick: () -> Unit) {
+fun ColorSample(color: String, onClick: () -> Unit) {
     Button(
         onClick = onClick,
         modifier = Modifier
             .size(48.dp)
             .padding(8.dp),
         shape = CircleShape,
-        colors = ButtonDefaults.buttonColors(containerColor = hexToComposeColor(color.hex))
+        colors = ButtonDefaults.buttonColors(containerColor = hexToComposeColor(color))
     ) {}
 }
 
@@ -479,7 +480,7 @@ fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
                 onDismissRequest = { showColorPicker.value = false },
                 onColorChanged = { color ->
                 },
-                initialColor = previewUiState.currentColor.toComposeColor(),
+                initialColor = hexToComposeColor( previewUiState.currentColor),
                 onSave = { color ->
                     Log.d("Color picker", "selected color: ${color}")
                     previewViewModel.setCurrentColor(color.toPaletteColor())
@@ -489,7 +490,7 @@ fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
         }
         if (showContrastModal.value) {
             ContrastColorPickerDialog(
-                palette = previewUiState.colors,
+                palette = previewUiState.palette,
                 onDismissRequest = { showContrastModal.value = false },
                 firstColor = previewUiState.currentColor)
         }
