@@ -196,18 +196,15 @@ fun generateImageForPalette(palette: Palette): Bitmap {
             paint
         )
 
-        // Draw the hex code under the color block
-
     }
 
     return bitmap
 }
 
 fun generateListOfHexcodes(palette: Palette): List<String> {
-    val colors = palette.colors.orEmpty() // Get the list of colors from the palette
+    val colors = palette.colors.orEmpty()
     val hexCodes = mutableListOf<String>()
 
-    // Iterate over each color and convert it to a hex code
     colors.forEach { color ->
         val hexCode = String.format("#%06X", (0xFFFFFF and android.graphics.Color.parseColor(color)))
         hexCodes.add(hexCode)
@@ -223,11 +220,11 @@ fun saveImageToDevice(
     description: String,
     hexCodes: List<String>
 ): Boolean {
-    val timeStamp = System.currentTimeMillis() // Get current timestamp
-    val imageFileName = "${title}_$timeStamp.jpg" // Append timestamp to filename
+    val timeStamp = System.currentTimeMillis()
+    val imageFileName = "${title}_$timeStamp.jpg"
 
     val contentValues = ContentValues().apply {
-        put(MediaStore.Images.Media.DISPLAY_NAME, imageFileName) // Use unique filename
+        put(MediaStore.Images.Media.DISPLAY_NAME, imageFileName)
         put(MediaStore.Images.Media.DESCRIPTION, description)
         put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
     }
@@ -238,14 +235,11 @@ fun saveImageToDevice(
     return if (imageUri != null) {
         try {
             resolver.openOutputStream(imageUri)?.use { outputStream ->
-                // Create a new bitmap to draw the hex codes
                 val newBitmap = Bitmap.createBitmap(bitmap.width, bitmap.height + 20, Bitmap.Config.ARGB_8888)
                 val canvas = Canvas(newBitmap)
 
-                // Draw the original bitmap
                 canvas.drawBitmap(bitmap, 0f, 0f, null)
 
-                // Draw the hex codes
                 val paint = Paint().apply {
                     color = android.graphics.Color.BLACK
                     textSize = 16f
@@ -253,7 +247,6 @@ fun saveImageToDevice(
                 }
                 val cellSize = bitmap.width / hexCodes.size
                 hexCodes.forEachIndexed { index, hexCode ->
-                    // Draw a light grey rectangle behind the text
                     paint.color = android.graphics.Color.LTGRAY
                     canvas.drawRect(
                         (index * cellSize).toFloat(),
@@ -263,17 +256,15 @@ fun saveImageToDevice(
                         paint
                     )
 
-                    // Draw the hex code
                     paint.color = android.graphics.Color.BLACK
                     canvas.drawText(
                         hexCode,
                         (index * cellSize + cellSize / 2).toFloat(),
-                        bitmap.height + 20f - 5, // 5 pixels from the bottom of the new bitmap
+                        bitmap.height + 20f - 5,
                         paint
                     )
                 }
 
-                // Compress and save the new bitmap
                 if (newBitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)) {
                     Toast.makeText(context, "Palette exported successfully", Toast.LENGTH_SHORT).show()
                     true // Image saved successfully
@@ -281,7 +272,7 @@ fun saveImageToDevice(
                     Toast.makeText(context, "Failed to export palette", Toast.LENGTH_SHORT).show()
                     false // Failed to save image
                 }
-            } ?: false // OutputStream is null
+            } ?: false
         } catch (e: Exception) {
             e.printStackTrace()
             Toast.makeText(context, "Failed to export palette", Toast.LENGTH_SHORT).show()
@@ -347,7 +338,7 @@ fun ColorBoxWithHex(color: String, hexCode: String) {
             text = hexCode,
             fontSize = 12.sp,
             modifier = Modifier.padding(top = 4.dp),
-            color = Color.Black // Adjust the color as needed
+            color = Color.Black 
         )
     }
 }
