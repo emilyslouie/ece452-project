@@ -50,6 +50,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.style.TextAlign
+import com.example.palletify.ColorUtils.hexToRgb
+import com.example.palletify.ColorUtils.toRgb
+import com.example.palletify.data.GenerationMode
+import com.example.palletify.data.Palette
 import android.graphics.Color as GraphicsColor
 
 
@@ -64,8 +68,8 @@ fun GenerateWithImageScreen(
     val paletteViewModel =
         ViewModelProvider(context as ViewModelStoreOwner).get(PaletteViewModel::class.java)
 
-    val colors = remember { mutableStateListOf<String>()}
-    val moreColors = remember { mutableStateListOf<String>()}
+    val colors = remember { mutableStateListOf<Palette.Color>()}
+    val moreColors = remember { mutableStateListOf<Palette.Color>()}
 
     val colorPalette by generatorViewModel.colorPalette
 
@@ -89,21 +93,25 @@ fun GenerateWithImageScreen(
             if (bitmap != null) {
                 launchedEffectTriggered = true
                 generatorViewModel.setColorPaletteFromImage(
-                    colors = extractColorsFromBitmap(
+                    extractColorsFromBitmap(
                         bitmap = bitmap
                     )
                 )
                 var colorCount = 0
                 colorPalette.forEach { (_, value) ->
-                    if (!(colors.contains(value) || moreColors.contains(value))) {
-                        if (colorCount < 5) {
-                            colors.add(value)
+                    val colorObj = Palette.Color(
+                        Palette.Hex(value, value.substring(1)),
+                        hexToRgb(value).toRgb(),
+                        Palette.Name("")
+                    )
+                    if (!(colors.contains(colorObj) || moreColors.contains(colorObj))) {
+                        if (colorCount < MAX_NUMBER_OF_COLORS - 1) {
+                            colors.add(colorObj)
                             colorCount++
                         } else {
-                            moreColors.add(value)
+                            moreColors.add(colorObj)
                         }
                     }
-
                 }
             }
         } catch (e: Exception) {
@@ -140,11 +148,11 @@ fun GenerateWithImageScreen(
                         modifier = Modifier
                             .size(60.dp)
                             .clickable {
-                                onSelectionChange(color)
+                                onSelectionChange(color.hex.value)
                             }
-                            .background(Color(GraphicsColor.parseColor(color)))
+                            .background(Color(GraphicsColor.parseColor(color.hex.value)))
                             .border(
-                                if (color == selectedOption) {
+                                if (color.hex.value == selectedOption) {
                                     BorderStroke(1.5.dp, Color.DarkGray)
                                 } else {
                                     BorderStroke(0.dp, Color.White)
@@ -153,7 +161,7 @@ fun GenerateWithImageScreen(
                         ,
                     )
                 }
-                if (colors.size <= 5) {
+                if (colors.size < MAX_NUMBER_OF_COLORS) {
                     Button(
                         modifier = Modifier
                             .size(60.dp)
@@ -183,12 +191,11 @@ fun GenerateWithImageScreen(
                     .heightIn(min = 55.dp)
                     .fillMaxWidth(),
                     onClick = {
-                        val currentPalette = generatorViewModel.uiState.value.currentPalette
-                        val numberOfColors = generatorViewModel.uiState.value.numberOfColours
+                        val numberOfColors = colors.size
                         val mode = generatorViewModel.uiState.value.mode
                         val colorsList = mutableListOf<String>()
                         for (i in 0 until numberOfColors) {
-                            val color = currentPalette[i].hex.value
+                            val color = colors[i].hex.value
                             colorsList.add(color)
                         }
                         val palette = com.example.palletify.database.Palette(
@@ -228,8 +235,19 @@ fun GenerateWithImageScreen(
                         .padding(12.dp)
                         .heightIn(min = 55.dp).weight(1f),
                         onClick = {
-                            colors.remove(selectedOption)
-                            moreColors.add(selectedOption)
+                            if (colors.size > MIN_NUMBER_OF_COLORS) {
+                                val colorObj = Palette.Color(
+                                    Palette.Hex(selectedOption, selectedOption.substring(1)),
+                                    hexToRgb(selectedOption).toRgb(),
+                                    Palette.Name("")
+                                )
+
+                                colors.remove(colorObj)
+                                moreColors.add(colorObj)
+
+                            } else {
+                                Toast.makeText(context, "Need min of 3 colors", Toast.LENGTH_SHORT).show()
+                            }
                             onSelectionChange("")
                         }
                     ) {

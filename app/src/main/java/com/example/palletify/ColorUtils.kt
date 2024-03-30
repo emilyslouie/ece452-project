@@ -2,6 +2,7 @@ package com.example.palletify
 
 import androidx.compose.ui.graphics.Color
 import androidx.core.graphics.toColorInt
+import com.example.palletify.data.Palette
 import java.lang.Integer.parseInt
 import kotlin.math.max
 import kotlin.math.min
@@ -44,7 +45,7 @@ object ColorUtils {
         if (hex[0] == '#') {
             formattedHex = hex.substring(1);
         }
-        val bigint: Int = parseInt(formattedHex, 16)
+        val bigint: Int = formattedHex.toLong(16).toInt()
         val r: Int = bigint shr 16 and 255
         val g: Int = bigint shr 8 and 255
         val b: Int = bigint and 255
@@ -63,6 +64,11 @@ object ColorUtils {
         return componentToHex(rgb[0]).uppercase() + componentToHex(rgb[1]).uppercase() + componentToHex(
             rgb[2]
         ).uppercase();
+    }
+
+    fun Array<Int>.toRgb(): Palette.Rgb {
+        require(size == 3) { "Array must contain exactly three elements for Rgb conversion" }
+        return Palette.Rgb(get(0), get(1), get(2))
     }
 
 
