@@ -113,10 +113,6 @@ fun GenerateWithImageScreen(
                         }
                     }
                 }
-
-                var lockedColours = mutableSetOf<Palette.Color>()
-                var palette = GeneratorViewModel.PaletteObj(colorCount, colors, GenerationMode.ANY, lockedColours)
-                generatorViewModel.setCurrentPalette(palette)
             }
         } catch (e: Exception) {
             Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()

@@ -2,6 +2,7 @@ package com.example.palletify
 
 import androidx.compose.ui.graphics.Color
 import androidx.core.graphics.toColorInt
+import com.example.palletify.data.Palette
 import java.lang.Integer.parseInt
 import kotlin.math.max
 import kotlin.math.min
