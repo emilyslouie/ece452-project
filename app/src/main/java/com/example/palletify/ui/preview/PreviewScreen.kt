@@ -279,6 +279,7 @@ fun ColorPickerDialog(
                         .padding(10.dp)
                         .height(35.dp),
                     controller = controller,
+                    initialColor = initialColor
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -288,6 +289,7 @@ fun ColorPickerDialog(
                         .padding(10.dp)
                         .height(35.dp),
                     controller = controller,
+                    initialColor = initialColor
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
