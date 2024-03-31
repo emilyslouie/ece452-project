@@ -86,8 +86,10 @@ fun ThisOrThatScreen(thisOrThatViewModel: ThisOrThatViewModel = viewModel()) {
                         }
                         TextButton(
                             onClick = {
-                                val currentPalette = thisOrThatViewModel.uiState.value.currentPalettes[0].colors
-                                val numberOfColors = thisOrThatViewModel.uiState.value.currentPalettes[0].numberOfColours
+                                val currentPalette =
+                                    thisOrThatViewModel.uiState.value.currentPalettes[0].colors
+                                val numberOfColors =
+                                    thisOrThatViewModel.uiState.value.currentPalettes[0].numberOfColours
                                 val mode = thisOrThatViewModel.uiState.value.currentPalettes[0].mode
                                 val colorsList = mutableListOf<String>()
                                 for (i in 0 until numberOfColors) {
@@ -121,8 +123,10 @@ fun ThisOrThatScreen(thisOrThatViewModel: ThisOrThatViewModel = viewModel()) {
                         }
                         TextButton(
                             onClick = {
-                                val currentPalette = thisOrThatViewModel.uiState.value.currentPalettes[1].colors
-                                val numberOfColors = thisOrThatViewModel.uiState.value.currentPalettes[1].numberOfColours
+                                val currentPalette =
+                                    thisOrThatViewModel.uiState.value.currentPalettes[1].colors
+                                val numberOfColors =
+                                    thisOrThatViewModel.uiState.value.currentPalettes[1].numberOfColours
                                 val mode = thisOrThatViewModel.uiState.value.currentPalettes[1].mode
                                 val colorsList = mutableListOf<String>()
                                 for (i in 0 until numberOfColors) {
@@ -169,7 +173,11 @@ fun ThisOrThatScreen(thisOrThatViewModel: ThisOrThatViewModel = viewModel()) {
                 ) {
                     Row() {
                         if (thisOrThatUiState.currentPalettes.size > 0)
-                            Palettes(thisOrThatViewModel, thisOrThatUiState.currentPalettes, columnHeightDp)
+                            Palettes(
+                                thisOrThatViewModel,
+                                thisOrThatUiState.currentPalettes,
+                                columnHeightDp
+                            )
                     }
                 }
             }
@@ -186,9 +194,14 @@ fun Palettes(
 
     val numOfColors = currentPalettes[0].numberOfColours
     val heightPerColor = heightAvailable / numOfColors;
-    Column () {
+    Column() {
         for (i in 0..<numOfColors) {
-            ColorsInRow(thisOrThatViewModel, currentPalettes[0].colors[i], currentPalettes[1].colors[i], heightPerColor)
+            ColorsInRow(
+                thisOrThatViewModel,
+                currentPalettes[0].colors[i],
+                currentPalettes[1].colors[i],
+                heightPerColor
+            )
         }
     }
 }
@@ -233,7 +246,11 @@ fun ColorsInRow(
                     )
                     Text(
                         text = firstColor.name.value,
-                        color = if (luminosity >= 0.179) Color(35, 35, 35) else Color(230, 230, 230),
+                        color = if (luminosity >= 0.179) Color(35, 35, 35) else Color(
+                            230,
+                            230,
+                            230
+                        ),
                         style = typography.labelMedium
                     )
                 }
@@ -258,8 +275,6 @@ fun ColorsInRow(
                     calculateLuminosity(secondColor.rgb.r, secondColor.rgb.g, secondColor.rgb.b)
 
                 Column(
-                    modifier = Modifier
-                        .clickable { }
                 ) {
                     Text(
                         modifier = Modifier.padding(bottom = 2.dp),
@@ -269,7 +284,11 @@ fun ColorsInRow(
                     )
                     Text(
                         text = secondColor.name.value,
-                        color = if (luminosity >= 0.179) Color(35, 35, 35) else Color(230, 230, 230),
+                        color = if (luminosity >= 0.179) Color(35, 35, 35) else Color(
+                            230,
+                            230,
+                            230
+                        ),
                         style = typography.labelMedium
                     )
                 }
