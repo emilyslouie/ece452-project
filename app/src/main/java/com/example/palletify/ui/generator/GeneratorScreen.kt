@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,6 +17,8 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Redo
 import androidx.compose.material.icons.automirrored.filled.Undo
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.Refresh
@@ -275,7 +278,8 @@ fun Palette(
     onItemClick: (com.example.palletify.data.Palette.Color) -> Unit
 ) {
     val heightPerColor = heightAvailable / numOfColors;
-    colors.forEach { color ->
+    colors.forEachIndexed { index, color ->
+        color.index = index
         ColorInPalette(
             generatorViewModel,
             color,
@@ -324,7 +328,7 @@ fun ColorInPalette(
                 .height(heightPerColor)
                 .background(hexToComposeColor(color.hex.value.toString()))
                 .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+            horizontalArrangement = Arrangement.End,
             verticalAlignment = Alignment.CenterVertically,
 
             ) {
@@ -345,27 +349,59 @@ fun ColorInPalette(
                 )
             }
 
-            if (!generatorUiState.lockedColors.contains(color)) {
-                // Button to lock a colour
-                IconButton(
-                    onClick = { generatorViewModel.handleLockForColor(color) }
-                ) {
-                    Icon(
-                        Icons.Filled.LockOpen,
-                        contentDescription = "Lock a colour",
-                        tint = if (luminosity >= 0.179) Color.Black else Color.White
-                    )
+            Spacer(modifier = Modifier.weight(1.0f))
+
+            Column(
+            ) {
+                if (color.index != 0) {
+                    // Button to move a colour up
+                    IconButton(
+                        onClick = { generatorViewModel.handleMoveColourUp(color) }
+                    ) {
+                        Icon(
+                            Icons.Filled.ArrowUpward,
+                            contentDescription = "Move a colour up",
+                            tint = if (luminosity >= 0.179) Color.Black else Color.White
+                        )
+                    }
                 }
-            } else {
-                // Button to unlock a colour
-                IconButton(
-                    onClick = { generatorViewModel.handleUnlockForColor(color) }
-                ) {
-                    Icon(
-                        Icons.Filled.Lock,
-                        contentDescription = "Unlock a colour",
-                        tint = if (luminosity >= 0.179) Color.Black else Color.White
-                    )
+                if (color.index != generatorUiState.numberOfColours - 1) {
+                    // Button to move a colour down
+                    IconButton(
+                        onClick = { generatorViewModel.handleMoveColourDown(color) }
+                    ) {
+                        Icon(
+                            Icons.Filled.ArrowDownward,
+                            contentDescription = "Move a colour down",
+                            tint = if (luminosity >= 0.179) Color.Black else Color.White
+                        )
+                    }
+                }
+            }
+
+            Row() {
+                if (!generatorUiState.lockedColors.contains(color)) {
+                    // Button to lock a colour
+                    IconButton(
+                        onClick = { generatorViewModel.handleLockForColor(color) }
+                    ) {
+                        Icon(
+                            Icons.Filled.LockOpen,
+                            contentDescription = "Lock a colour",
+                            tint = if (luminosity >= 0.179) Color.Black else Color.White
+                        )
+                    }
+                } else {
+                    // Button to unlock a colour
+                    IconButton(
+                        onClick = { generatorViewModel.handleUnlockForColor(color) }
+                    ) {
+                        Icon(
+                            Icons.Filled.Lock,
+                            contentDescription = "Unlock a colour",
+                            tint = if (luminosity >= 0.179) Color.Black else Color.White
+                        )
+                    }
                 }
             }
         }
