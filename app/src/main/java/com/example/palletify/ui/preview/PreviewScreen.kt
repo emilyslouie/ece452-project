@@ -320,7 +320,7 @@ fun ColorPickerDialog(
                             onDismissRequest()
                         }
                     ) {
-                        Text("Save")
+                        Text("OK")
                     }
                 }
             }
@@ -422,7 +422,7 @@ fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
     val showColorPicker = remember { mutableStateOf(false) }
     val showContrastModal = remember { mutableStateOf(false) }
     val controller = rememberColorPickerController()
-    val palleteViewModel: PaletteViewModel = viewModel()
+    val paletteViewModel: PaletteViewModel = viewModel()
 
     Scaffold(
         topBar = {
@@ -452,6 +452,35 @@ fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
                             )
                         ) {}
                     }
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Button(onClick = {
+                        val currentPalette = previewUiState.palette
+                        val numberOfColors = previewUiState.palette.size
+                        val mode = "any"
+                        val colorsList = mutableListOf<String>()
+                        if (previewUiState.buildMode) {
+                            for (i in 0 until numberOfColors) {
+                                val color = currentPalette[i]
+                                colorsList.add(color)
+                            }
+                            val palette = com.example.palletify.database.Palette(
+                                0,
+                                numberOfColors,
+                                colorsList,
+                                mode,
+                                favourite = false
+                            )
+                            paletteViewModel.addPalette(palette)
+                        } else {
+                            paletteViewModel.updatePaletteColorsById(previewUiState.paletteID, currentPalette)
+                        }
+                    }
+                    ) {
+                        Text(
+                            text = "Save",
+                            style = MaterialTheme.typography.titleLarge,
+                        )
+                    }
                 },
             )
         },
@@ -470,7 +499,6 @@ fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
                     if (index != -1 ) {
                         paletteCopy[index] = color.toPaletteColor()
                     }
-                    palleteViewModel.updatePaletteColorsById(previewUiState.paletteID, paletteCopy)
                     previewViewModel.setCurrentPalette(paletteCopy)
                     showColorPicker.value = false
                 }
@@ -496,7 +524,7 @@ fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
                     .padding(start = 28.dp, top = 28.dp, end = 28.dp)
             ) {
                 Text(
-                    text = "Welcome to Palletify Preview!",
+                    text = if (previewUiState.buildMode) "Welcome to Palletify Builder!" else "Welcome to Palletify Preview!",
                     style = TextStyle(
                         fontSize = 24.sp,
                         textAlign = TextAlign.Center

@@ -26,8 +26,11 @@
 | 03/27/2024 |      |          | 2     |             |        |      | Fetch colour name and display it in generator                      |
 | 03/27/2024 | 5    |          |       |             |        |      | Add menu to choose generation mode, add monochrome generation mode |
 | 03/28/2024 |      |          | 8     |             |        |      | Add gradient colour generator mode                                 |
+| 03/28/2024 |      |          |       |             | 4      |      | Load Palette Colours in Preview Page - Components                  |
 | 03/28/2024 |      |          |       | 5.5         |        |      | Edit Palette Colours in Preview Page - Components                  |
 | 03/29/2024 |      |          | 8     |             |        |      | Create list of trademarked colours and warn user if used           |
 | 03/29/2024 |      |          | 5     |             |        |      | When adding new colours, generate it using our algorithms          |
 | 03/29/2024 |      |          |       | 7           |        |      | Persist Color Edits in Database + Add Constrast Modal              |
 | 03/30/2024 |      |          | 4     |             |        |      | Begin scaffolding for This Or That generator                       |
+| 03/30/2024 |      |          |       |             | 5      |      | Finish This or That Generator + Bugfixes                           |
+| 03/30/2024 |      |          |       |             | 3      |      | Add Palette Building from Scratch for Preview + Polish Preview     |
