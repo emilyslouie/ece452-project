@@ -142,7 +142,10 @@ fun GenerateWithImageScreen(
             ) {
                 colors.forEach { color ->
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(text = color.hex.clean.substring(3).uppercase())
+                        Text(
+                            text = if (color.hex.clean.length > 6) color.hex.clean.substring(2)
+                                .uppercase() else color.hex.clean
+                        )
                         Box(
                             modifier = Modifier
                                 .size(50.dp)
