@@ -145,12 +145,13 @@ fun fetchPalette(
     generationMode: GenerationMode,
 ): MutableList<Palette.Color> {
     val result = when (generationMode) {
-        GenerationMode.COMPLEMENT -> generateComplementaryPalette(seeds, count);
-        GenerationMode.RANDOM -> generateRandomPalette(seeds, count);
-        GenerationMode.ANALOGIC -> generateAnalogicPalette(seeds, count);
-        GenerationMode.GRADIENT -> generateGradientPalette(seeds, count);
         GenerationMode.MONOCHROME -> generateMonochromePalette(seeds, count);
-        // TODO: Implement the remaining color generation algorithms
+        GenerationMode.ANALOGIC -> generateAnalogicPalette(seeds, count);
+        GenerationMode.COMPLEMENT -> generateComplementaryPalette(seeds, count);
+        GenerationMode.TRIAD -> generateTriadicPalette(seeds, count)
+        GenerationMode.QUAD -> generateQuarticPalette(seeds, count)
+        GenerationMode.GRADIENT -> generateGradientPalette(seeds, count);
+        GenerationMode.RANDOM -> generateRandomPalette(seeds, count);
         else -> {
             // If the generation mode is not specified, for now, get a random palette from the Color API
             fetchPaletteFromColorApi(seed = seeds.first().hex.clean, numOfColours = count);
@@ -266,7 +267,6 @@ fun generateMonochromePalette(
 
     val start = rgbColors.count()
     // use random step size to generate new palettes off of the same seeds
-    // randomize sign of step so we aren't always increasing/decreasing S and L
     val step = Random.nextDouble(0.2, 1.0)
 
     for (i in start..<count) {
@@ -282,6 +282,103 @@ fun generateMonochromePalette(
 
         // add to array
         rgbColors.add(newRgbColour)
+    }
+
+    // get colour names and convert from rgb colours into Palette.Color objects
+    val result: MutableList<Palette.Color> = mutableListOf();
+    for (color in 0..<count) {
+        val currColor = rgbColors[color];
+        val rgb = Palette.Rgb(currColor[0], currColor[1], currColor[2]);
+        val hexValue = rgbToHex(currColor);
+        val hex = Palette.Hex("#$hexValue", hexValue);
+        val name = fetchColorName(hex);
+        result.add(Palette.Color(hex, rgb, name));
+    }
+    return result;
+}
+
+fun generateTriadicPalette(
+    seeds: MutableSet<Palette.Color>,
+    count: Int
+): MutableList<Palette.Color> {
+    val rgbColors: MutableList<Array<Int>> = mutableListOf();
+
+    for (color in seeds) {
+        val rgb = color.rgb;
+        rgbColors.add(arrayOf(rgb.r, rgb.g, rgb.b))
+    }
+
+    var hslSeed = 0;
+    var currentCount = rgbColors.size;
+    while (currentCount < count) {
+        val hsl = rgbToHsl(rgbColors[hslSeed]);
+
+        // after the first two colours are generated (once hslSeed > 0) add "half step" offset
+        val offset = 0.5 * 1.0/3.0 * hslSeed
+
+        // generate two new colours from the seed so that hues are equidistant on the colour wheel
+        val firstNewHue = (hsl[0] + 1.0/3.0 + offset) % 1.0
+        val secondNewHue = (hsl[0] + 2.0/3.0 + offset) % 1.0
+
+        // create new rgb colours
+        val firstNewRgbColour = hslToRgb(arrayOf(firstNewHue, hsl[1], hsl[2]))
+        val secondNewRgbColour = hslToRgb(arrayOf(secondNewHue, hsl[1], hsl[2]))
+
+        rgbColors.add(firstNewRgbColour)
+        rgbColors.add(secondNewRgbColour)
+
+        hslSeed++;
+        currentCount += 2;
+    }
+
+    // get colour names and convert from rgb colours into Palette.Color objects
+    val result: MutableList<Palette.Color> = mutableListOf();
+    for (color in 0..<count) {
+        val currColor = rgbColors[color];
+        val rgb = Palette.Rgb(currColor[0], currColor[1], currColor[2]);
+        val hexValue = rgbToHex(currColor);
+        val hex = Palette.Hex("#$hexValue", hexValue);
+        val name = fetchColorName(hex);
+        result.add(Palette.Color(hex, rgb, name));
+    }
+    return result;
+}
+
+fun generateQuarticPalette(
+    seeds: MutableSet<Palette.Color>,
+    count: Int
+): MutableList<Palette.Color> {
+    val rgbColors: MutableList<Array<Int>> = mutableListOf();
+
+    for (color in seeds) {
+        val rgb = color.rgb;
+        rgbColors.add(arrayOf(rgb.r, rgb.g, rgb.b))
+    }
+
+    var hslSeed = 0;
+    var currentCount = rgbColors.size;
+    while (currentCount < count) {
+        val hsl = rgbToHsl(rgbColors[hslSeed]);
+
+        // after the first two colours are generated (once hslSeed > 0) add "half step" offset
+        val offset = 0.5 * 1.0/4.0 * hslSeed
+
+        // generate three new colours from the seed so that hues are equidistant on the colour wheel
+        val firstNewHue = (hsl[0] + 1.0/4.0 + offset) % 1
+        val secondNewHue = (hsl[0] + 2.0/4.0 + offset) % 1
+        val thirdNewHue = (hsl[0] + 3.0/4.0 + offset) % 1
+
+        // create new rgb colours
+        val firstNewRgbColour = hslToRgb(arrayOf(firstNewHue, hsl[1], hsl[2]))
+        val secondNewRgbColour = hslToRgb(arrayOf(secondNewHue, hsl[1], hsl[2]))
+        val thirdNewRgbColour = hslToRgb(arrayOf(thirdNewHue, hsl[1], hsl[2]))
+
+        rgbColors.add(firstNewRgbColour)
+        rgbColors.add(secondNewRgbColour)
+        rgbColors.add(thirdNewRgbColour)
+
+        hslSeed++;
+        currentCount += 3;
     }
 
     // get colour names and convert from rgb colours into Palette.Color objects
