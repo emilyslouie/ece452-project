@@ -23,9 +23,10 @@
 | 03/24/2024 |      |          | 4     |             |        |      | Add complementary colour generation mode                           |
 | 03/25/2024 |      |          | 3     |             |        |      | Add analogous colour generation mode                               |
 | 03/26/2024 |      |          | 2     |             |        |      | Add random colour generator mode                                   |
+| 03/26/2024 |      |          |       |             |        |  6   | Get colorAPI working with images                                   |
 | 03/27/2024 |      |          | 2     |             |        |      | Fetch colour name and display it in generator                      |
-| 03/27/2024 |      |          |       |             |        |  6   | Get colorAPI working with images                                   |
 | 03/27/2024 | 5    |          |       |             |        |      | Add menu to choose generation mode, add monochrome generation mode |
+| 03/27/2024 |      |          |       |             |        |  4   | Update UI for image page to be more user friendly and interactive  |
 | 03/28/2024 |      |          |       |             |        |  6   | Get image generate palette working with library page               |
 | 03/28/2024 |      |          | 8     |             |        |      | Add gradient colour generator mode                                 |
 | 03/28/2024 |      |          |       |             | 4      |      | Load Palette Colours in Preview Page - Components                  |
