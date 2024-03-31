@@ -613,7 +613,7 @@ fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
                     Text("Edit Color")
                 }
                 Button(
-                    modifier = Modifier.padding(start=8.dp, top=8.dp, bottom=28.dp),
+                    modifier = Modifier.padding(start=8.dp, top=8.dp, bottom=10.dp),
                     onClick = { showContrastModal.value = true }
                 ) {
                     Text("Contrast with Another Color")
@@ -622,7 +622,7 @@ fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
+                    .padding(start=16.dp, end=16.dp, bottom=16.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 var expanded = remember { mutableStateOf(false) }
