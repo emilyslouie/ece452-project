@@ -356,7 +356,10 @@ fun ColorInPalette(
                 if (color.index != 0) {
                     // Button to move a colour up
                     IconButton(
-                        onClick = { generatorViewModel.handleMoveColourUp(color) }
+                        onClick = { generatorViewModel.handleMoveColourUp(color) },
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .weight(1f)
                     ) {
                         Icon(
                             Icons.Filled.ArrowUpward,
@@ -368,7 +371,10 @@ fun ColorInPalette(
                 if (color.index != generatorUiState.numberOfColours - 1) {
                     // Button to move a colour down
                     IconButton(
-                        onClick = { generatorViewModel.handleMoveColourDown(color) }
+                        onClick = { generatorViewModel.handleMoveColourDown(color) },
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .weight(1f)
                     ) {
                         Icon(
                             Icons.Filled.ArrowDownward,

@@ -194,6 +194,7 @@ class GeneratorViewModel : ViewModel() {
                 currentPalette.numberOfColours = newCount;
                 val newColor = getColorMatchingPalette(seed, currentPalette.mode);
                 val indexToAddNewColor = currentPalette.colors.indexOf(seed) + 1;
+                newColor.index = indexToAddNewColor
                 currentPalette.colors.add(indexToAddNewColor, newColor);
                 val newPalette = currentPalette.colors.toMutableList();
                 _uiState.update { currentState ->
