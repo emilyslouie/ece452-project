@@ -318,6 +318,7 @@ fun PaletteItem(palette: Palette, navigationController: NavController, previewVi
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable {
+                        previewViewModel.setBuildMode(false)
                         previewViewModel.setCurrentPaletteID(palette.id)
                         palette.colors?.let { previewViewModel.setCurrentPalette(it) }
                         previewViewModel.setCurrentColor(palette.colors?.get(0) ?: "#FFFFFF")

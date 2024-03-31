@@ -9,11 +9,16 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -35,6 +40,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.navigation.compose.NavHost
@@ -46,6 +52,7 @@ import com.example.palletify.ui.preview.PreviewScreen
 import com.example.palletify.ui.theme.PalletifyTheme
 import kotlinx.coroutines.launch
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.palletify.ui.components.BottomSheet
 import com.example.palletify.ui.generator.GenerateWithImageScreen
 import com.example.palletify.ui.image.createImageFile
 import com.example.palletify.ui.preview.PreviewViewModel
@@ -115,6 +122,46 @@ fun NavDrawer() {
         uploadedImageUri = uri
     }
 
+    var showPreviewBottomSheet by remember { mutableStateOf(false) }
+
+    if (showPreviewBottomSheet) {
+        BottomSheet(onDismiss = { showPreviewBottomSheet = false }) {
+            Column(Modifier.padding(top = 16.dp, bottom = 16.dp)) {
+                Row(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                    Text(modifier = Modifier.clickable(
+                        onClick = {
+                            coroutineScope.launch {
+                                drawerState.close()
+                            }
+                            navigationController.navigate(Screens.Library.screen) {
+                                popUpTo(0)
+                            }
+                            showPreviewBottomSheet = false
+                        }
+                    ),
+                        text = "Go to Library")
+                }
+                HorizontalDivider()
+                Row(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                    Text(modifier = Modifier.clickable(
+                        onClick = {
+                            previewViewModel.setBuildMode(true)
+                            previewViewModel.setDefaultValues()
+                            coroutineScope.launch {
+                                drawerState.close()
+                            }
+                            navigationController.navigate(Screens.PreviewScreen.screen) {
+                                popUpTo(0)
+                            }
+                            showPreviewBottomSheet = false
+                        }
+                    ),
+                        text = "Create Palette from Scratch")
+                }
+            }
+        }
+    }
+
     ModalNavigationDrawer(
         drawerState = drawerState,
         gesturesEnabled = true,
@@ -181,12 +228,7 @@ fun NavDrawer() {
                 NavigationDrawerItem(label = { Text(text = "Preview") },
                     selected = false,
                     onClick = {
-                        coroutineScope.launch {
-                            drawerState.close()
-                        }
-                        navigationController.navigate(Screens.PreviewScreen.screen) {
-                            popUpTo(0)
-                        }
+                        showPreviewBottomSheet = true
                     })
                 NavigationDrawerItem(label = { Text(text = "This or That") },
                     selected = false,
