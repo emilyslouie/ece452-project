@@ -1,9 +1,8 @@
 package com.example.palletify
 
 import androidx.compose.ui.graphics.Color
-import androidx.core.graphics.toColorInt
 import com.example.palletify.data.Palette
-import java.lang.Integer.parseInt
+import com.example.palletify.data.fetchColorName
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
@@ -11,6 +10,30 @@ import kotlin.math.roundToInt
 import kotlin.random.Random
 
 object ColorUtils {
+    fun Color.toPaletteColorString(): String {
+        // Convert the floating-point values to 0-255 and then to a hex string
+        val redValue = (this.red * 255).toInt()
+        val greenValue = (this.green * 255).toInt()
+        val blueValue = (this.blue * 255).toInt()
+
+        return String.format("#%02X%02X%02X", redValue, greenValue, blueValue)
+    }
+
+    fun Color.toPaletteColor(): Palette.Color {
+        // Convert the floating-point values to 0-255 and then to a hex string
+        val redValue = (this.red * 255).toInt()
+        val greenValue = (this.green * 255).toInt()
+        val blueValue = (this.blue * 255).toInt()
+
+        val rgb = Palette.Rgb(redValue, greenValue, blueValue);
+        val hexValue =
+            String.format("#%02X%02X%02X", redValue, greenValue, blueValue)
+        val hex = Palette.Hex(hexValue, hexValue.substring(1));
+        val name = fetchColorName(hex);
+
+        return Palette.Color(hex, rgb, name);
+    }
+
     fun hexToComposeColor(hex: String): Color {
         return Color(android.graphics.Color.parseColor(hex));
     }
