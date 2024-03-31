@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import java.util.Collections
 import kotlin.concurrent.thread
 
 
@@ -291,6 +292,39 @@ class GeneratorViewModel : ViewModel() {
                 currentPalette.lockedColours
             )
         )
+    }
 
+    /*
+    * Move a colour "up" in the Palette's color list
+    */
+    fun handleMoveColourUp(color: Palette.Color) {
+        val reorderedColours = currentPalette.colors;
+        // swap with colour in list above it
+        Collections.swap(reorderedColours, color.index, color.index - 1)
+        setCurrentPalette(
+            PaletteObj(
+                currentPalette.numberOfColours,
+                reorderedColours,
+                currentPalette.mode,
+                currentPalette.lockedColours
+            )
+        )
+    }
+
+    /*
+    * Move a colour "down" in the Palette's color list
+    */
+    fun handleMoveColourDown(color: Palette.Color) {
+        val reorderedColours = currentPalette.colors;
+        // swap with colour in list above it
+        Collections.swap(reorderedColours, color.index, color.index + 1)
+        setCurrentPalette(
+            PaletteObj(
+                currentPalette.numberOfColours,
+                reorderedColours,
+                currentPalette.mode,
+                currentPalette.lockedColours
+            )
+        )
     }
 }

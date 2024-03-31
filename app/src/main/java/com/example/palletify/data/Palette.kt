@@ -9,6 +9,7 @@ class Palette {
         val hex: Hex,
         val rgb: Rgb,
         val name: Name,
+        var index: Int = -1,
     ) {
         // Override default equals operator since it uses referential equality by default (compare addresses)
         // We want structural equality (compare values of all members in struct)
