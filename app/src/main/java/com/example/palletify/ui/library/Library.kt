@@ -45,9 +45,12 @@ import androidx.compose.material3.AlertDialog
 import android.content.ContentValues
 import android.content.Context
 import android.provider.MediaStore
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.navigation.NavHostController
 import androidx.navigation.NavController
 import com.example.palletify.Screens
@@ -55,6 +58,8 @@ import com.example.palletify.ui.preview.PreviewViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -298,6 +303,14 @@ fun showToast(message: String, context: Context) {
     Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
 }
 
+fun calculateSpacing(numberOfColors: Int): Dp {
+    return if (numberOfColors == 6) {
+        6.dp
+    } else {
+        10.dp
+    }
+}
+
 @Composable
 fun PaletteItem(palette: Palette, navigationController: NavController, previewViewModel: PreviewViewModel) {
     Surface(
@@ -325,9 +338,23 @@ fun PaletteItem(palette: Palette, navigationController: NavController, previewVi
                         navigationController.navigate(Screens.PreviewScreen.screen)
                     },
             ) {
-                palette.colors?.forEach { color ->
-                    val hexCode = generateHexCode(color)
-                    ColorBoxWithHex(color = color, hexCode = hexCode)
+                palette.colors?.let { colors ->
+                    val spacing = calculateSpacing(colors.size)
+                    val totalPadding = 22.dp * 2 // Total horizontal padding
+                    val totalSpacing = 8.dp * (colors.size - 1) // Total spacing between color boxes
+                    val availableWidth = LocalConfiguration.current.screenWidthDp.dp - totalPadding - totalSpacing
+                    val cellWidth = with(LocalDensity.current) {
+                        availableWidth / colors.size
+                    }
+                    colors.forEachIndexed { index, color ->
+                        val hexCode = generateHexCode(color)
+                        ColorBoxWithHex(color = color, hexCode = hexCode, width = cellWidth, numberOfColors = colors.size)
+                        if (index < colors.size - 1) {
+                            Spacer(modifier = Modifier.width(spacing))
+                        }
+                    }
+
+
                 }
             }
         }
@@ -339,10 +366,27 @@ fun generateHexCode(color: String): String {
     return String.format("#%06X", (0xFFFFFF and android.graphics.Color.parseColor(color)))
 }
 
+fun calculateFontSize(numberOfColors: Int): Float {
+    val baseFontSize = 18f
+    return if (numberOfColors == 6) {
+        10f
+    }
+    else {
+        baseFontSize - numberOfColors
+    }
+}
 
 @Composable
-fun ColorBoxWithHex(color: String, hexCode: String) {
-    Column {
+fun ColorBoxWithHex(color: String, hexCode: String, width: Dp, numberOfColors: Int) {
+    val fontSize = calculateFontSize(numberOfColors)
+    Column (
+        modifier = if (numberOfColors == 6) {
+            Modifier.width(width)
+        } else {
+            Modifier
+        }
+    )
+    {
         Box(
             modifier = Modifier
                 .size(60.dp)
@@ -350,12 +394,10 @@ fun ColorBoxWithHex(color: String, hexCode: String) {
         )
         Text(
             text = hexCode,
-            fontSize = 12.sp,
+            fontSize = fontSize.sp,
             modifier = Modifier.padding(top = 4.dp),
             color = Color.Black
         )
     }
 }
-
-
 
