@@ -368,6 +368,35 @@ fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
                             )
                         ) {}
                     }
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Button(onClick = {
+                        val currentPalette = previewUiState.palette
+                        val numberOfColors = previewUiState.palette.size
+                        val mode = "any"
+                        val colorsList = mutableListOf<String>()
+                        if (previewUiState.buildMode) {
+                            for (i in 0 until numberOfColors) {
+                                val color = currentPalette[i]
+                                colorsList.add(color)
+                            }
+                            val palette = com.example.palletify.database.Palette(
+                                0,
+                                numberOfColors,
+                                colorsList,
+                                mode,
+                                favourite = false
+                            )
+                            paletteViewModel.addPalette(palette)
+                        } else {
+                            paletteViewModel.updatePaletteColorsById(previewUiState.paletteID, currentPalette)
+                        }
+                    }
+                    ) {
+                        Text(
+                            text = "Save",
+                            style = MaterialTheme.typography.titleLarge,
+                        )
+                    }
                 },
             )
         },
@@ -413,7 +442,7 @@ fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
                     .padding(start = 28.dp, top = 28.dp, end = 28.dp)
             ) {
                 Text(
-                    text = "Welcome to Palletify Preview!",
+                    text = if (previewUiState.buildMode) "Welcome to Palletify Builder!" else "Welcome to Palletify Preview!",
                     style = TextStyle(
                         fontSize = 24.sp,
                         textAlign = TextAlign.Center

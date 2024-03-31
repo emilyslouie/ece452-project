@@ -22,6 +22,23 @@ class PreviewViewModel : ViewModel() {
         }
     }
 
+    fun setDefaultValues() {
+        _uiState.update {currentState ->
+            currentState.copy(
+                palette = listOf<String>("#000000", "#000000", "#000000", "#000000", "#000000"),
+                currentColor = "#000000"
+            )
+        }
+    }
+
+    fun setBuildMode(x: Boolean) {
+        _uiState.update {currentState ->
+            currentState.copy(
+                buildMode = x
+            )
+        }
+    }
+
     fun setCurrentPaletteID(id: Int) {
         _uiState.update {currentState ->
             currentState.copy(
