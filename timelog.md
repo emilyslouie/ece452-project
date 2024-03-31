@@ -19,6 +19,8 @@
 | 03/02/2024 |      |          |       | 4           |        |      | Accessibility checker                                              |
 | 03/03/2024 |      |          |       |             |        | 1    | Add sample image color template                                    |
 | 03/12/2024 |      |          | 6     |             |        |      | Increase or decrease number of colours in palette                  |
+| 03/18/2024 |      | 3        |       |             |        |      | Updated database to store different number of colours              |
+| 03/18/2024 |      | 4        |       |             |        |      | Swipe to delete on library page, exporting                         |
 | 03/24/2024 |      |          | 6     |             |        |      | Implement plumbing to handle our own colour generation methods     |
 | 03/24/2024 |      |          | 4     |             |        |      | Add complementary colour generation mode                           |
 | 03/25/2024 |      |          | 3     |             |        |      | Add analogous colour generation mode                               |
@@ -40,6 +42,7 @@
 | 03/30/2024 |      |          |       |             | 3      |      | Add Palette Building from Scratch for Preview + Polish Preview     |
 | 03/30/2024 |      |          |       | 6           |        |      | Research Into and Experiment with Color Blindness Filter Options   |
 | 03/30/2024 |      |          |       | 2           |        |      | Impelement Color Blindness Filters Using Color Matrix Operations   |
+| 03/30/2024 |      | 3        |       |             |        |      | Library UI updates                                                 |
 | 03/31/2024 |      |          | 5     |             |        |      | Add color picker for GeneratorScreen                               |
 | 03/31/2024 | 6    |          |       |             |        |      | Add triad and quad generation modes                                |
 | 03/31/2024 | 2.5  |          |       |             |        |      | Add AboutScreen and information to address Buddy Team feedback     |
