@@ -26,7 +26,8 @@ class PreviewViewModel : ViewModel() {
         _uiState.update {currentState ->
             currentState.copy(
                 palette = listOf<String>("#000000", "#000000", "#000000", "#000000", "#000000"),
-                currentColor = "#000000"
+                currentColor = "#000000",
+                currentColorIndex = 0
             )
         }
     }
@@ -57,8 +58,13 @@ class PreviewViewModel : ViewModel() {
 
     fun setCurrentColor(color: String) {
         _uiState.update { currentState ->
+            var index = currentState.palette.indexOf(color)
+            if (index == -1) {
+                index = currentState.currentColorIndex
+            }
             currentState.copy(
-                currentColor = color
+                currentColor = color,
+                currentColorIndex = index
             )
         }
     }

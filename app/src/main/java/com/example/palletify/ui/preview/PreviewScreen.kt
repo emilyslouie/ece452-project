@@ -4,6 +4,7 @@ package com.example.palletify.ui.preview
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,6 +27,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -68,6 +71,15 @@ import com.example.palletify.ui.theme.PalletifyTheme
 import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 import kotlin.random.Random
 
+fun Color.toPaletteColor(): String {
+    // Convert the floating-point values to 0-255 and then to a hex string
+    val redValue = (this.red * 255).toInt()
+    val greenValue = (this.green * 255).toInt()
+    val blueValue = (this.blue * 255).toInt()
+    val alphaValue = (this.alpha * 255).toInt()
+
+    return String.format("#%02X%02X%02X%02X", alphaValue, redValue, greenValue, blueValue)
+}
 
 @Composable
 fun OutlinedRadioButtonWithText(
@@ -211,6 +223,79 @@ fun ProfileCard(
     }
 }
 
+// https://github.com/MaPePeR/jsColorblindSimulator/blob/master/colorblind.js
+enum class ColorBlindnessMode(val displayName: String) {
+    Normal("Normal"),
+    Protanopia("Protanopia"),
+    Protanomaly("Protanomaly"),
+    Deuteranopia("Deuteranopia"),
+    Deuteranomaly("Deuteranomaly"),
+    Tritanopia("Tritanopia")
+}
+
+fun getColorMatrixForMode(mode: ColorBlindnessMode): Array<FloatArray> {
+    return when (mode) {
+        ColorBlindnessMode.Normal -> arrayOf(
+            floatArrayOf(1f, 0f, 0f),
+            floatArrayOf(0f, 1f, 0f),
+            floatArrayOf(0f, 0f, 1f)
+        )
+
+        ColorBlindnessMode.Protanopia -> arrayOf(
+            floatArrayOf(0.56667f, 0.43333f, 0.0f),
+            floatArrayOf(0.55833f, 0.44167f, 0.0f),
+            floatArrayOf(0.0f, 0.24167f, 0.75833f)
+        )
+
+        ColorBlindnessMode.Protanomaly -> arrayOf(
+            floatArrayOf(0.81667f, 0.18333f, 0.0f),
+            floatArrayOf(0.33333f, 0.66667f, 0.0f),
+            floatArrayOf(0.0f, 0.125f, 0.875f),
+        )
+
+        ColorBlindnessMode.Deuteranomaly -> arrayOf(
+            floatArrayOf(0.80f, 0.20f, 0.0f),
+            floatArrayOf(0.25833f, 0.74167f, 0.0f),
+            floatArrayOf(0.0f, 0.14167f, 0.85833f)
+        )
+
+        ColorBlindnessMode.Deuteranopia -> arrayOf(
+            floatArrayOf(0.625f, 0.375f, 0.0f),
+            floatArrayOf(0.70f, 0.30f, 0.0f),
+            floatArrayOf(0.0f, 0.30f, 0.70f)
+        )
+
+        ColorBlindnessMode.Tritanopia -> arrayOf(
+            floatArrayOf(0.95f, 0.05f, 0.0f),
+            floatArrayOf(0.0f, 0.43333f, 0.56667f),
+            floatArrayOf(0.0f, 0.475f, 0.525f)
+        )
+    }
+}
+
+fun applyColorBlindnessFilter(mode: ColorBlindnessMode, color: Color): Color {
+    val matrix = getColorMatrixForMode(mode)
+
+    val original = floatArrayOf(
+        color.red,
+        color.green,
+        color.blue
+    )
+
+    val transformed = FloatArray(3)
+
+    for (i in 0..2) {
+        transformed[i] =
+            original[0] * matrix[i][0] + original[1] * matrix[i][1] + original[2] * matrix[i][2]
+    }
+
+    return Color(
+        red = transformed[0].coerceIn(0f, 1f),
+        green = transformed[1].coerceIn(0f, 1f),
+        blue = transformed[2].coerceIn(0f, 1f),
+        alpha = color.alpha
+    )
+}
 
 @Composable
 fun RadioButtonGroup(
@@ -337,6 +422,8 @@ fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
 
     val showColorPicker = remember { mutableStateOf(false) }
     val showContrastModal = remember { mutableStateOf(false) }
+    val selectedMode = remember { mutableStateOf(ColorBlindnessMode.Normal) }
+
     val controller = rememberColorPickerController()
     val paletteViewModel: PaletteViewModel = viewModel()
 
@@ -388,7 +475,10 @@ fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
                             )
                             paletteViewModel.addPalette(palette)
                         } else {
-                            paletteViewModel.updatePaletteColorsById(previewUiState.paletteID, currentPalette)
+                            paletteViewModel.updatePaletteColorsById(
+                                previewUiState.paletteID,
+                                currentPalette
+                            )
                         }
                     }
                     ) {
@@ -407,7 +497,7 @@ fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
                 onDismissRequest = { showColorPicker.value = false },
                 onColorChanged = { color ->
                 },
-                initialColor = hexToComposeColor(previewUiState.currentColor),
+                initialColor = hexToComposeColor(previewUiState.palette[previewUiState.currentColorIndex]),
                 onSave = { color ->
                     previewViewModel.setCurrentColor(color.toPaletteColorString())
                     val paletteCopy = previewUiState.palette.toList().toMutableList()
@@ -418,6 +508,7 @@ fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
                     paletteViewModel.updatePaletteColorsById(previewUiState.paletteID, paletteCopy)
                     previewViewModel.setCurrentPalette(paletteCopy)
                     showColorPicker.value = false
+                    selectedMode.value = ColorBlindnessMode.Normal
                 }
             )
         }
@@ -460,10 +551,40 @@ fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
                     Text("Edit Color")
                 }
                 Button(
-                    modifier = Modifier.padding(start = 8.dp, top = 8.dp, bottom = 28.dp),
+                    modifier = Modifier.padding(start = 8.dp, top = 8.dp, bottom = 10.dp),
                     onClick = { showContrastModal.value = true }
                 ) {
                     Text("Contrast with Another Color")
+                }
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                var expanded = remember { mutableStateOf(false) }
+                Text(
+                    "Color Blindness Mode: ${selectedMode.value.displayName}",
+                    modifier = Modifier.clickable { expanded.value = true })
+                DropdownMenu(
+                    expanded = expanded.value,
+                    onDismissRequest = { expanded.value = false }
+                ) {
+                    ColorBlindnessMode.values().forEach { mode ->
+                        DropdownMenuItem(
+                            text = { Text(mode.displayName) },
+                            onClick = {
+                                selectedMode.value = mode
+                                val filteredColor = applyColorBlindnessFilter(
+                                    mode,
+                                    hexToComposeColor(previewUiState.palette[previewUiState.currentColorIndex])
+                                )
+                                previewViewModel.setCurrentColor(filteredColor.toPaletteColor())
+                                expanded.value = false
+                            }
+                        )
+                    }
                 }
             }
             AccessibleComponentWrapper(
