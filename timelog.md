@@ -40,3 +40,4 @@
 | 03/30/2024 |      |          |       |             | 3      |      | Add Palette Building from Scratch for Preview + Polish Preview     |
 | 03/30/2024 |      |          |       | 6           |        |      | Research Into and Experiment with Color Blindness Filter Options   |
 | 03/30/2024 |      |          |       | 2           |        |      | Impelement Color Blindness Filters Using Color Matrix Operations   |
+| 03/31/2024 |      |          | 5     |             |        |      | Add color picker for GeneratorScreen                               |

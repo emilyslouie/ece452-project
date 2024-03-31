@@ -277,4 +277,20 @@ class GeneratorViewModel : ViewModel() {
             );
         }
     }
+
+    fun replaceColorInPalette(color: Palette.Color, colorToReplace: Palette.Color) {
+        val newPalette = currentPalette.colors;
+        val indexToReplace = newPalette.indexOf(colorToReplace);
+        if (indexToReplace == -1) return;
+        newPalette[indexToReplace] = color;
+        setCurrentPalette(
+            PaletteObj(
+                currentPalette.numberOfColours,
+                newPalette,
+                currentPalette.mode,
+                currentPalette.lockedColours
+            )
+        )
+
+    }
 }
