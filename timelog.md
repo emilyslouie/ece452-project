@@ -42,3 +42,4 @@
 | 03/30/2024 |      |          |      | 2           |        |      | Impelement Color Blindness Filters Using Color Matrix Operations   |
 | 03/31/2024 |      |          | 5    |             |        |      | Add color picker for GeneratorScreen                               |
 | 03/31/2024 | 6    |          |      |             |        |      | Add triad and quad generation modes                                |
+| 03/31/2024 | 2.5  |          |      |             |        |      | Add AboutScreen and information to address Buddy Team feedback     |

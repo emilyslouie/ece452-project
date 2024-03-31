@@ -52,6 +52,7 @@ import com.example.palletify.ui.preview.PreviewScreen
 import com.example.palletify.ui.theme.PalletifyTheme
 import kotlinx.coroutines.launch
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.palletify.ui.about.AboutScreen
 import com.example.palletify.ui.components.BottomSheet
 import com.example.palletify.ui.generator.GenerateWithImageScreen
 import com.example.palletify.ui.image.createImageFile
@@ -240,6 +241,16 @@ fun NavDrawer() {
                             popUpTo(0)
                         }
                     })
+                NavigationDrawerItem(label = { Text(text = "About") },
+                    selected = false,
+                    onClick = {
+                        coroutineScope.launch {
+                            drawerState.close()
+                        }
+                        navigationController.navigate(Screens.About.screen) {
+                            popUpTo(0)
+                        }
+                    })
             }
         },
     ) {
@@ -284,6 +295,7 @@ fun NavDrawer() {
                 composable(Screens.PreviewScreen.screen) { PreviewScreen(previewViewModel) }
                 composable(Screens.GenerateScreen.screen) { GeneratorScreen() }
                 composable(Screens.ThisOrThatScreen.screen) { ThisOrThatScreen() }
+                composable(Screens.About.screen) { AboutScreen() }
             }
         }
     }
