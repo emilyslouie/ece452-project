@@ -52,12 +52,15 @@ import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.palletify.ColorUtils.hexToComposeColor
+import com.example.palletify.ColorUtils.toPaletteColor
 import com.example.palletify.data.GenerationMode
 import com.example.palletify.database.Palette
 import com.example.palletify.database.PaletteViewModel
 import com.example.palletify.ui.components.BottomSheet
+import com.example.palletify.ui.components.ColorPickerDialog
 import com.example.palletify.ui.components.TrademarkComponentWrapper
 import com.example.palletify.ui.theme.PalletifyTheme
+import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 import kotlin.concurrent.thread
 import kotlin.math.pow
 
@@ -78,10 +81,27 @@ fun GeneratorScreen(generatorViewModel: GeneratorViewModel = viewModel()) {
         )
     }
 
-    // Bottom sheet that is shown when clicking on the name the color
-    if (activeColor != null) {
-        BottomSheet(onDismiss = { activeColor = null }) {
+    var bottomSheet by remember { mutableStateOf<Boolean>(false) }
+
+    val showColorPicker = remember { mutableStateOf(false) }
+    val controller = rememberColorPickerController()
+
+    // Bottom sheet that is shown when clicking on the name of the color
+    if (bottomSheet) {
+        BottomSheet(onDismiss = { activeColor = null; bottomSheet = false }) {
             Column(Modifier.padding(top = 16.dp, bottom = 16.dp)) {
+                Row(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                    Text(modifier = Modifier.clickable(
+                        enabled = !generatorUiState.lockedColors.contains(activeColor!!),
+                        onClick = {
+                            bottomSheet = false
+                            showColorPicker.value = true
+                        }
+                    ),
+                        color = if (!generatorUiState.lockedColors.contains(activeColor!!)) Color.Black else Color.LightGray,
+                        text = "Edit this color")
+                }
+                HorizontalDivider()
                 Row(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
                     Text(modifier = Modifier.clickable(
                         enabled = generatorUiState.numberOfColours < 6,
@@ -90,6 +110,7 @@ fun GeneratorScreen(generatorViewModel: GeneratorViewModel = viewModel()) {
                                 activeColor!!
                             )
                             activeColor = null
+                            bottomSheet = false
                         }
                     ),
                         color = if (generatorUiState.numberOfColours < 6) Color.Black else Color.LightGray,
@@ -104,6 +125,7 @@ fun GeneratorScreen(generatorViewModel: GeneratorViewModel = viewModel()) {
                                 activeColor!!
                             )
                             activeColor = null
+                            bottomSheet = false
                         }
                     ),
                         color = if (generatorUiState.numberOfColours > 3) Color.Black else Color.LightGray,
@@ -112,6 +134,27 @@ fun GeneratorScreen(generatorViewModel: GeneratorViewModel = viewModel()) {
             }
 
         }
+    }
+
+    // Colour picker to individually edit a single colour
+    if (showColorPicker.value) {
+        ColorPickerDialog(
+            controller = controller,
+            onDismissRequest = { showColorPicker.value = false },
+            onColorChanged = {
+            },
+            initialColor = hexToComposeColor(activeColor!!.hex.value),
+            onSave = { color ->
+                thread {
+                    val paletteColor = color.toPaletteColor();
+                    generatorViewModel.replaceColorInPalette(paletteColor, activeColor!!)
+                    activeColor = null
+                    showColorPicker.value = false
+                }
+
+
+            }
+        )
     }
 
     Box(
@@ -214,6 +257,7 @@ fun GeneratorScreen(generatorViewModel: GeneratorViewModel = viewModel()) {
                         heightAvailable = columnHeightDp
                     ) { selectedColor ->
                         activeColor = selectedColor
+                        bottomSheet = true
                     }
                 }
             }
