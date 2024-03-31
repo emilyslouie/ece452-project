@@ -43,3 +43,4 @@
 | 03/31/2024 |      |          | 5    |             |        |      | Add color picker for GeneratorScreen                               |
 | 03/31/2024 | 6    |          |      |             |        |      | Add triad and quad generation modes                                |
 | 03/31/2024 | 2.5  |          |      |             |        |      | Add AboutScreen and information to address Buddy Team feedback     |
+| 03/31/2024 |      |          | 0.5  |             |        |      | Add hexes in palette when taking picture                           |

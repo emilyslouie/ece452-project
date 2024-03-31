@@ -29,11 +29,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModelProvider
@@ -41,19 +44,12 @@ import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberImagePainter
-import com.example.palletify.R
-import com.example.palletify.database.PaletteViewModel
-import java.lang.Long.parseLong
-import com.example.palletify.ui.generator.GenerateWithImage.convertImageUrlToBitmap
-import com.example.palletify.ui.generator.GenerateWithImage.extractColorsFromBitmap
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.text.style.TextAlign
 import com.example.palletify.ColorUtils.hexToRgb
 import com.example.palletify.ColorUtils.toRgb
-import com.example.palletify.data.GenerationMode
 import com.example.palletify.data.Palette
+import com.example.palletify.database.PaletteViewModel
+import com.example.palletify.ui.generator.GenerateWithImage.convertImageUrlToBitmap
+import com.example.palletify.ui.generator.GenerateWithImage.extractColorsFromBitmap
 import android.graphics.Color as GraphicsColor
 
 
@@ -68,8 +64,8 @@ fun GenerateWithImageScreen(
     val paletteViewModel =
         ViewModelProvider(context as ViewModelStoreOwner).get(PaletteViewModel::class.java)
 
-    val colors = remember { mutableStateListOf<Palette.Color>()}
-    val moreColors = remember { mutableStateListOf<Palette.Color>()}
+    val colors = remember { mutableStateListOf<Palette.Color>() }
+    val moreColors = remember { mutableStateListOf<Palette.Color>() }
 
     val colorPalette by generatorViewModel.colorPalette
 
@@ -133,7 +129,7 @@ fun GenerateWithImageScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Image(
                 painter = rememberImagePainter(uploadedImageUri),
@@ -141,31 +137,38 @@ fun GenerateWithImageScreen(
             )
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.Bottom
             ) {
                 colors.forEach { color ->
-                    Box(
-                        modifier = Modifier
-                            .size(60.dp)
-                            .clickable {
-                                onSelectionChange(color.hex.value)
-                            }
-                            .background(Color(GraphicsColor.parseColor(color.hex.value)))
-                            .border(
-                                if (color.hex.value == selectedOption) {
-                                    BorderStroke(1.5.dp, Color.DarkGray)
-                                } else {
-                                    BorderStroke(0.dp, Color.White)
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = if (color.hex.clean.length > 6) color.hex.clean.substring(2)
+                                .uppercase() else color.hex.clean
+                        )
+                        Box(
+                            modifier = Modifier
+                                .size(50.dp)
+                                .clickable {
+                                    onSelectionChange(color.hex.value)
                                 }
-                            )
-                        ,
-                    )
+                                .background(Color(GraphicsColor.parseColor(color.hex.value)))
+                                .border(
+                                    if (color.hex.value == selectedOption) {
+                                        BorderStroke(1.5.dp, Color.DarkGray)
+                                    } else {
+                                        BorderStroke(0.dp, Color.White)
+                                    }
+                                ),
+                        )
+                    }
+
                 }
                 if (colors.size < MAX_NUMBER_OF_COLORS) {
                     Button(
                         modifier = Modifier
-                            .size(60.dp)
-                            .heightIn(min = 55.dp),
+                            .size(50.dp)
+                            .heightIn(min = 45.dp),
 
                         onClick = {
                             if (moreColors.isNotEmpty()) {
@@ -177,7 +180,7 @@ fun GenerateWithImageScreen(
                         Text(
                             text = "+",
                             style = TextStyle(
-                                fontSize = 32.sp, fontWeight = FontWeight.Medium
+                                fontSize = 28.sp, fontWeight = FontWeight.Medium
                             ),
                             textAlign = TextAlign.Center
                         )
@@ -185,7 +188,7 @@ fun GenerateWithImageScreen(
                 }
 
             }
-            if (selectedOption == ""){
+            if (selectedOption == "") {
                 Button(modifier = Modifier
                     .padding(12.dp)
                     .heightIn(min = 55.dp)
@@ -217,10 +220,11 @@ fun GenerateWithImageScreen(
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
-                ){
+                ) {
                     Button(modifier = Modifier
                         .padding(12.dp)
-                        .heightIn(min = 55.dp).weight(1f),
+                        .heightIn(min = 55.dp)
+                        .weight(1f),
                         onClick = {
                             onSelectionChange("")
                         }
@@ -233,7 +237,8 @@ fun GenerateWithImageScreen(
                     }
                     Button(modifier = Modifier
                         .padding(12.dp)
-                        .heightIn(min = 55.dp).weight(1f),
+                        .heightIn(min = 55.dp)
+                        .weight(1f),
                         onClick = {
                             if (colors.size > MIN_NUMBER_OF_COLORS) {
                                 val colorObj = Palette.Color(
@@ -246,7 +251,8 @@ fun GenerateWithImageScreen(
                                 moreColors.add(colorObj)
 
                             } else {
-                                Toast.makeText(context, "Need min of 3 colors", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, "Need min of 3 colors", Toast.LENGTH_SHORT)
+                                    .show()
                             }
                             onSelectionChange("")
                         }
