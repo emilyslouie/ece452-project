@@ -38,3 +38,4 @@
 | 03/30/2024 |      |          | 4     |             |        |      | Begin scaffolding for This Or That generator                       |
 | 03/30/2024 |      |          |       |             | 5      |      | Finish This or That Generator + Bugfixes                           |
 | 03/30/2024 |      |          |       |             | 3      |      | Add Palette Building from Scratch for Preview + Polish Preview     |
+| 03/31/2024 |      |          | 5     |             |        |      | Add color picker for GeneratorScreen                               |
