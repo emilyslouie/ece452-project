@@ -105,7 +105,7 @@ fun ColorPickerDialog(
                             onDismissRequest()
                         }
                     ) {
-                        Text("Save")
+                        Text("OK")
                     }
                 }
             }
