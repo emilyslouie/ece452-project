@@ -505,7 +505,6 @@ fun PreviewScreen(previewViewModel: PreviewViewModel = viewModel()) {
                     if (index != -1) {
                         paletteCopy[index] = color.toPaletteColorString()
                     }
-                    paletteViewModel.updatePaletteColorsById(previewUiState.paletteID, paletteCopy)
                     previewViewModel.setCurrentPalette(paletteCopy)
                     showColorPicker.value = false
                     selectedMode.value = ColorBlindnessMode.Normal
